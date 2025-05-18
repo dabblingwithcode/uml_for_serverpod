@@ -10,7 +10,7 @@ Generate PlantUML diagrams from YAML model files.
 ## Installation
 
 ```bash
-dart pub global activate uml_generator
+dart pub global activate uml_for_serverpod
 ```
 
 Or add to your project's pubspec.yaml:
@@ -25,7 +25,7 @@ dependencies:
 ### As a command-line tool
 
 ```bash
-uml_generator --dir=lib/src/models --output=er_diagram.puml
+dart run uml_for_serverpod --dir=lib/src/models --output=er_diagram.puml
 ```
 
 ### As a library
@@ -40,7 +40,7 @@ Future<void> main() async {
     yamlOutputFile: File('all_yaml_content.txt'),
     umlOutputFile: File('er_diagram.puml'),
     // Optional customization
-    oneHexColor: '#800080',
+    classHexColor: '#800080',
     manyHexColor: '#008000',
   );
   
@@ -52,7 +52,7 @@ Future<void> main() async {
 You can customize the UML generation by providing a YAML configuration file:
 
 ```bash
-uml_for_serverpod --config=uml_config.yaml
+dart run uml_for_serverpod --config=uml_config.yaml
 ```
 
 Example configuration file `uml_config.yaml`:
@@ -74,6 +74,18 @@ classHexColor: '#ff962f'
 - `--output, -o`: Output PlantUML file (default: "er_diagram.puml")
 - `--yaml-output`: Output file for concatenated YAML content (default: "all_yaml_content.txt")
 - `--help, -h`: Show usage information
+
+
+## Visualize your .puml file
+
+You can visualize your .puml file pasting the code here:
+
+https://editor.plantuml.com/
+
+If you are using vscode, there is also an extension:
+
+https://marketplace.visualstudio.com/items/?itemName=jebbs.plantuml
+
 
 ### Customize / contribute
 

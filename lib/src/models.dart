@@ -44,6 +44,7 @@ class UmlModel {
 class UmlConfig {
   final bool printComments;
   final bool colorfullArrows;
+  final String modelsDirPath;
   final String commentHexColor;
   final String manyHexColor;
   final String manyString;
@@ -55,6 +56,7 @@ class UmlConfig {
   UmlConfig({
     this.printComments = true,
     this.colorfullArrows = true,
+    this.modelsDirPath = 'lib',
     this.commentHexColor = '#93c47d',
     this.manyHexColor = '#27ae60',
     this.manyString = 'N',
@@ -68,6 +70,7 @@ class UmlConfig {
     return UmlConfig(
       printComments: map['printComments'] ?? true,
       colorfullArrows: map['colorfullArrows'] ?? true,
+      modelsDirPath: map['modelsDirPath'] ?? 'lib',
       commentHexColor: map['commentHexColor'] ?? '#93c47d',
       manyHexColor: map['manyHexColor'] ?? '#27ae60',
       manyString: map['manyString'] ?? 'N',

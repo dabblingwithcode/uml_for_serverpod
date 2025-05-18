@@ -9,7 +9,7 @@ void main(List<String> args) async {
   final parser = ArgParser()
     ..addOption('dir',
         abbr: 'd',
-        defaultsTo: 'lib/src/models',
+        defaultsTo: 'lib',
         help: 'Directory containing .spy.yaml files')
     ..addOption('output',
         abbr: 'o', defaultsTo: 'er_diagram.puml', help: 'Output PlantUML file')
@@ -50,20 +50,17 @@ void main(List<String> args) async {
     }
 
     final generator = UmlGenerator(
-      modelsDir: Directory(results['dir']),
+      config: config,
+      // TODO: Fix this
+      modelsDirPath: (results['dir'] != config.modelsDirPath)
+          ? results['dir']
+          : config.modelsDirPath,
       yamlOutputFile: File(results['yaml-output']),
       umlOutputFile: File(results['output']),
-      printComments: config.printComments,
-      commentHexColor: config.commentHexColor,
-      manyHexColor: config.manyHexColor,
-      manyString: config.manyString,
-      oneHexColor: config.oneHexColor,
-      oneString: config.oneString,
-      relationHexColor: config.relationHexColor,
-      classHexColor: config.classHexColor,
     );
 
     await generator.generate();
+
     stdout.writeln('✅ Done! UML diagram created at ${results['output']}');
   } catch (e) {
     stdout.writeln('❌ Error: $e');

@@ -1,6 +1,6 @@
 name: uml_for_serverpod
 description: "Generate UML diagrams with your .spy.yaml serverpod models."
-version: 0.0.1
+version: 0.0.2
 homepage: https://github.com/dabblingwithcode/uml_for_serverpod
 
 environment:

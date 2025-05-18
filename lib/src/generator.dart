@@ -1,47 +1,31 @@
 import 'dart:io';
 
-import 'package:uml_for_serverpod/src/colors.dart';
+import 'package:uml_for_serverpod/src/yaml_parser.dart';
 
 import 'models.dart';
 
 class UmlGenerator {
-  final Directory modelsDir;
+  final UmlConfig config;
+  final String modelsDirPath;
+  late Directory modelsDir;
   final File yamlOutputFile;
   final File umlOutputFile;
 
-  // Config options
-  final bool printComments;
-  final bool colorfullArrows;
-  final String commentHexColor;
-  final String manyHexColor;
-  final String manyString;
-  final String oneHexColor;
-  final String oneString;
-  final String relationHexColor;
-  final String classHexColor;
-
+  YamlParser yamlParser;
   UmlGenerator({
-    required this.modelsDir,
+    required this.config,
+    required this.modelsDirPath,
     required this.yamlOutputFile,
     required this.umlOutputFile,
-    this.printComments = true,
-    this.colorfullArrows = true,
-    this.commentHexColor = '#93c47d',
-    this.manyHexColor = '#27ae60',
-    this.manyString = 'N',
-    this.oneHexColor = '#9b59b6',
-    this.oneString = '1',
-    this.relationHexColor = '#0164aa',
-    this.classHexColor = '#ff962f',
-  });
+  }) : yamlParser = YamlParser(config: config, modelsDirPath: modelsDirPath);
 
   Future<void> generate() async {
     // 1. Collect all .spy.yaml files and concatenate their content
-    final yamlContent = await collectYamlContent();
+    final yamlContent = await yamlParser.collectYamlContent();
     await yamlOutputFile.writeAsString(yamlContent);
 
     // 2. Parse YAML content to create UmlModel objects
-    final parsedData = parseYamlContent(yamlContent);
+    final parsedData = yamlParser.parseYamlContent(yamlContent);
     final classes = parsedData['classes'] as Map<String, UmlModel>;
     final relations = parsedData['relations'] as List<String>;
 
@@ -50,210 +34,30 @@ class UmlGenerator {
     await umlOutputFile.writeAsString(umlContent);
   }
 
-  Future<String> collectYamlContent() async {
-    final yamlFiles = <File>[];
-    await for (var entity
-        in modelsDir.list(recursive: true, followLinks: false)) {
-      if (entity is File && entity.path.endsWith('.spy.yaml')) {
-        yamlFiles.add(entity);
-      }
-    }
-
-    final yamlBuffer = StringBuffer();
-    for (var file in yamlFiles) {
-      yamlBuffer.writeln(
-          'filepath: ${file.path.replaceFirst(modelsDir.path, '').replaceAll('\\', '/')}');
-      yamlBuffer.writeln(await file.readAsString());
-      yamlBuffer.writeln();
-    }
-
-    return yamlBuffer.toString();
-  }
-
-  Map<String, dynamic> parseYamlContent(String content) {
-    final classes = <String, UmlModel>{};
-    final relations = <String>[];
-
-    final lines = content.split('\n');
-    UmlModel? currentModel;
-    int? lastArrowIndex;
-    Map<String, String> currentFields = {};
-    bool collectingEnumValues = false;
-    List<String> enumValues = [];
-
-    for (int i = 0; i < lines.length; i++) {
-      // First trim the lines
-      var line = lines[i].trimRight().trimLeft();
-
-      if (line.startsWith('filepath:')) {
-        // We have a new object
-        // If current model is not null, we already processed an object
-        // and we need to save it
-        if (currentModel != null) {
-          // collect the enum values
-          if (currentModel.isEnum == true && enumValues.isNotEmpty) {
-            currentModel.enumValues = enumValues.join(', ');
-            enumValues.clear();
-          }
-          // save the finished model in the classes map
-          if (currentFields.isNotEmpty) {
-            currentModel.fields = Map.of(currentFields);
-          }
-          // save the finished model in the classes map
-          classes[currentModel.name!] = currentModel;
-          collectingEnumValues = false;
-          currentFields.clear();
-        }
-        // reset the current model
-        currentModel = UmlModel(
-          filepath: line.substring(9).trim(),
-          fields: {},
-        );
-        continue;
-      }
-
-      if (line.startsWith('class:')) {
-        currentModel!.name = line.substring(6).trim();
-        currentModel.isEnum = false;
-        continue;
-      }
-
-      if (line.startsWith('enum:')) {
-        currentModel!.name = line.substring(5).trim();
-        currentModel.isEnum = true;
-        continue;
-      }
-      // Check for enum serialized value
-      if (currentModel!.isEnum == true && line.startsWith('serialized:')) {
-        currentModel.enumSerialized = line.substring(12).trim();
-        continue;
-      }
-      // Check for enum names
-      if (currentModel.isEnum == true &&
-          line.trimLeft().startsWith('values:')) {
-        enumValues.clear();
-        collectingEnumValues = true;
-        continue;
-      }
-
-      if (collectingEnumValues) {
-        if (line.trimLeft().startsWith('- ')) {
-          enumValues.add(line.trimLeft().substring(2).trim());
-          continue;
-        } else if (line.trim().isEmpty) {
-          collectingEnumValues = false;
-          continue;
-        }
-      }
-
-      if (line.startsWith('##')) {
-        // pass comments as key to the fields, we don't need a value
-        currentFields[line] = '';
-        continue;
-      }
-
-      // catch the indexing lines
-      if (line.startsWith('indexes:') || line.contains('idx:')) {
-        currentFields[line] = '';
-        continue;
-      }
-
-      // Start of fields block
-      if (line.startsWith('fields:')) {
-        continue;
-      }
-      // Check for table name
-      if (line.startsWith('table:')) {
-        currentModel.tableName = line.substring(6).trim();
-        continue;
-      }
-      // Check for field name and type
-      if (line.contains(':') && currentModel.isEnum != true) {
-        final parts = line.split(':');
-        if (parts.length >= 2) {
-          final fieldName = parts[0].trim();
-          final rest = parts.sublist(1).join(':').trim();
-          currentFields[fieldName] = rest;
-
-          if (rest.contains('relation')) {
-            final typeMatch =
-                RegExp(r'(List<)?([A-Za-z0-9_]+)').firstMatch(rest);
-            final type = typeMatch?.group(2);
-            if (type != null) {
-              bool isList = rest.contains('List<');
-              String arrow = '';
-              String right = isList
-                  ? '"<b><size:20><color:$manyHexColor><back:white>$manyString</back></color></size></b>"'
-                  : '"<b><size:20><color:$oneHexColor><back:white>$oneString</back></color></size></b>"';
-              String left = isList
-                  ? '"<b><size:20><color:$oneHexColor><back:white>$oneString</back></color></size></b>"'
-                  : '"<b><size:20><color:$manyHexColor><back:white>$manyString</back></color></size></b>"';
-              if (colorfullArrows) {
-                final arrowColors = colorPalette;
-                lastArrowIndex = lastArrowIndex ?? 0;
-                final colorIndex = lastArrowIndex % arrowColors.length;
-                final selectedColor = arrowColors.elementAt(colorIndex);
-                lastArrowIndex++; // Increment for next use
-                arrow = isList
-                    ? '<-[$selectedColor,thickness=4]-'
-                    : '-[$selectedColor,thickness=4]->';
-              } else {
-                arrow =
-                    isList ? '<-[#6aa84f,thickness=4]-' : '-[thickness=4]->';
-              }
-
-              if (!relations.any((r) =>
-                  r.contains(' ${currentModel!.name!} ') && r.contains(type))) {
-                relations.add(
-                    ' ${currentModel.name!}::$fieldName $left $arrow $right $type ');
-              }
-            }
-          }
-        }
-      }
-    }
-
-    // Save the last object
-    if (currentModel != null) {
-      if (currentModel.isEnum == true && enumValues.isNotEmpty) {
-        currentModel.enumValues = enumValues.join(', ');
-      }
-      if (currentFields.isNotEmpty) {
-        currentModel.fields = Map.of(currentFields);
-      }
-      classes[currentModel.name!] = currentModel;
-    }
-
-    return {
-      'classes': classes,
-      'relations': relations,
-    };
-  }
-
   String generateUml(Map<String, UmlModel> classes, List<String> relations) {
     final umlBuffer = StringBuffer();
     umlBuffer.writeln('''@startuml
-  ' Layout control
-left to right direction
-skinparam ranksep 100
-skinparam nodesep 80
-skinparam attributeFontSize 14
-<style>
-classDiagram {
-    RoundCorner 15
-    FontSize 13
-    FontStyle Regular
- 
-    class {
-      FontSize 12
-          header {
-            FontSize 36
-            FontStyle bold
-          }
+    ' Layout control
+    left to right direction
+    skinparam ranksep 100
+    skinparam nodesep 80
+    skinparam attributeFontSize 14
+    <style>
+    classDiagram {
+        RoundCorner 15
+        FontSize 13
+        FontStyle Regular
+    
+        class {
+          FontSize 12
+              header {
+                FontSize 36
+                FontStyle bold
+              }
+        }
     }
-}
-</style>
-    ''');
+    </style>
+        ''');
 
     // Generate classes/entities
     for (UmlModel model in classes.values) {
@@ -292,22 +96,24 @@ classDiagram {
             String fieldsLine = '';
             if (v.contains('relation')) {
               fieldsLine =
-                  ' ➡️ <i>$k</i> : <b><color:$classHexColor>${v.split(',')[0]}</color></b> ${v.split(',')[1].replaceFirst('relation', '<b><color:$relationHexColor>relation</color></b>')} ';
-            } else if (k.contains('##') & printComments) {
-              fieldsLine = '<color:$commentHexColor>$k</color>';
-            } else if (k.contains('##') & !printComments) {
+                  ' ➡️ <i>$k</i> : <b><color:${config.classHexColor}>${v.split(',')[0]}</color></b> ${v.split(',')[1].replaceFirst('relation', '<b><color:${config.relationHexColor}>relation</color></b>')} ';
+            } else if (k.contains('##') & config.printComments) {
+              fieldsLine = '<color:${config.commentHexColor}>$k</color>';
+            } else if (k.contains('##') & !config.printComments) {
               return;
             } else if (k.contains('indexes:')) {
               umlBuffer.writeln('--');
-              fieldsLine = '<b><color:$relationHexColor>$k</color></b>';
+              fieldsLine =
+                  '<b><color:${config.relationHexColor}>$k</color></b>';
             } else if (k.contains('idx:')) {
-              fieldsLine = '<b><color:$relationHexColor>$k</color></b>';
+              fieldsLine =
+                  '<b><color:${config.relationHexColor}>$k</color></b>';
             } else if (k.contains('unique')) {
               fieldsLine =
-                  '<b><color:$relationHexColor>$k</color></b>: <b><color:$classHexColor>$v</color></b>';
+                  '<b><color:${config.relationHexColor}>$k</color></b>: <b><color:${config.classHexColor}>$v</color></b>';
             } else {
               fieldsLine =
-                  '  <i>$k</i>: <b><color:$classHexColor>$v</color></b>';
+                  '  <i>$k</i>: <b><color:${config.classHexColor}>$v</color></b>';
             }
             umlBuffer.writeln(fieldsLine);
           });
