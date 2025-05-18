@@ -1,11 +1,11 @@
 
 
 
-# UML Generator
+# UML for Serverpod
 
-Generate PlantUML diagrams from YAML model files.
+Generate PlantUML diagrams from your serverpod `.spy.yaml` model files.
 
-![Example UML Diagram with Colored Arrows](images/diagram_color_arrows.png)
+![Example UML Diagram with Colored Arrows](https://github.com/dabblingwithcode/uml_for_serverpod/blob/main/images/diagram_color_arrows.png)
 
 ## Installation
 
@@ -17,7 +17,7 @@ Or add to your project's pubspec.yaml:
 
 ```yaml
 dependencies:
-  uml_generator: ^1.0.0
+  uml_generator: ^0.0.2
 ```
 
 ## Usage
@@ -32,7 +32,7 @@ dart run uml_for_serverpod --dir=lib/src/models --output=er_diagram.puml
 
 ```dart
 import 'dart:io';
-import 'package:uml_generator/uml_generator.dart';
+import 'package:uml_for_serverpod/uml_for_serverpod.dart';
 
 Future<void> main() async {
   final generator = UmlGenerator(
@@ -87,9 +87,9 @@ If you are using vscode, there is also an extension:
 https://marketplace.visualstudio.com/items/?itemName=jebbs.plantuml
 
 
-### Customize / contribute
+## Customize / contribute
 
-There are many uml customization options available, you can play aroung with them:
+There are many uml customization options available, you can play around with them:
 
 https://plantuml.com/en-dark/class-diagram
 
