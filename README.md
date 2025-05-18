@@ -5,6 +5,8 @@
 
 Generate PlantUML diagrams from YAML model files.
 
+![Example UML Diagram with Colored Arrows](images/diagram_color_arrows.png)
+
 ## Installation
 
 ```bash
