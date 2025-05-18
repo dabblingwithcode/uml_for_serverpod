@@ -8,21 +8,19 @@ class UmlGenerator {
   final UmlConfig config;
   final String modelsDirPath;
   late Directory modelsDir;
-  final File yamlOutputFile;
+
   final File umlOutputFile;
 
-  YamlParser yamlParser;
+  SpyYamlParser yamlParser;
   UmlGenerator({
     required this.config,
     required this.modelsDirPath,
-    required this.yamlOutputFile,
     required this.umlOutputFile,
-  }) : yamlParser = YamlParser(config: config, modelsDirPath: modelsDirPath);
+  }) : yamlParser = SpyYamlParser(config: config, modelsDirPath: modelsDirPath);
 
   Future<void> generate() async {
     // 1. Collect all .spy.yaml files and concatenate their content
     final yamlContent = await yamlParser.collectYamlContent();
-    await yamlOutputFile.writeAsString(yamlContent);
 
     // 2. Parse YAML content to create UmlModel objects
     final parsedData = yamlParser.parseYamlContent(yamlContent);
@@ -42,13 +40,31 @@ class UmlGenerator {
     skinparam ranksep 100
     skinparam nodesep 80
     skinparam attributeFontSize 14
+    skinparam class {
+BackgroundColor ${config.classBackgroundHexColor}
+
+BorderColor ${config.classBorderHexColor}
+
+}
     <style>
+document {
+  BackgroundColor #fff
+  Margin 100 100 100 100
+}
     classDiagram {
-        RoundCorner 15
+        RoundCorner 25
         FontSize 13
         FontStyle Regular
-    
+        package {
+          FontSize 12
+          BackgroundColor ${config.packageBackgroundHexColor}
+              title {
+                FontSize 36
+                FontStyle bold
+              }
+        }    
         class {
+          Padding 10 10 10 10
           FontSize 12
               header {
                 FontSize 36
@@ -81,8 +97,8 @@ class UmlGenerator {
         umlBuffer.writeln('}');
       } else {
         final umlTypeLine = isDatabaseObject
-            ? 'entity $className <<${model.tableName}>> ##[bold]black{'
-            : 'class $className ##[bold]black {';
+            ? 'entity ${model.name} <<table: <b>${model.tableName}</b>>> ##[bold] {'
+            : 'class ${model.name} ##[bold] {';
         umlBuffer.writeln(umlTypeLine);
 
         if (filepath.isNotEmpty) {
@@ -96,7 +112,7 @@ class UmlGenerator {
             String fieldsLine = '';
             if (v.contains('relation')) {
               fieldsLine =
-                  ' ➡️ <i>$k</i> : <b><color:${config.classHexColor}>${v.split(',')[0]}</color></b> ${v.split(',')[1].replaceFirst('relation', '<b><color:${config.relationHexColor}>relation</color></b>')} ';
+                  ' ➡️ <i>$k</i> : <b><color:${config.classNameHexColor}>${v.split(',')[0]}</color></b> ${v.split(',')[1].replaceFirst('relation', '<b><color:${config.relationHexColor}>relation</color></b>')} ';
             } else if (k.contains('##') & config.printComments) {
               fieldsLine = '<color:${config.commentHexColor}>$k</color>';
             } else if (k.contains('##') & !config.printComments) {
@@ -110,14 +126,15 @@ class UmlGenerator {
                   '<b><color:${config.relationHexColor}>$k</color></b>';
             } else if (k.contains('unique')) {
               fieldsLine =
-                  '<b><color:${config.relationHexColor}>$k</color></b>: <b><color:${config.classHexColor}>$v</color></b>';
+                  '<b><color:${config.relationHexColor}>$k</color></b>: <b><color:${config.classNameHexColor}>$v</color></b>';
             } else {
               fieldsLine =
-                  '  <i>$k</i>: <b><color:${config.classHexColor}>$v</color></b>';
+                  '  <i>$k</i>: <b><color:${config.classNameHexColor}>$v</color></b>';
             }
             umlBuffer.writeln(fieldsLine);
           });
         }
+
         umlBuffer.writeln('}');
       }
     }
@@ -139,16 +156,21 @@ class UmlGenerator {
       if (modelA.fields != null) {
         for (var entryB in classes.entries) {
           final modelB = entryB.value;
-          if (modelA.name == modelB.name) continue; // skip self
+          if (modelA.name!.split('.').last == modelB.name!.split('.').last) {
+            continue;
+          }
+          // skip self
           final found = modelA.fields!.entries.any((field) {
             final fieldValue = field.value;
             return !fieldValue.contains('relation') &&
-                (fieldValue == modelB.name ||
-                    fieldValue.contains('${modelB.name}?') ||
-                    fieldValue.contains('List<${modelB.name}>'));
+                (fieldValue == modelB.name!.split('.').last ||
+                    fieldValue.contains('${modelB.name!.split('.').last}?') ||
+                    fieldValue
+                        .contains('List<${modelB.name!.split('.').last}>'));
           });
           if (found) {
-            umlBuffer.writeln('${modelA.name} -- ${modelB.name}');
+            umlBuffer.writeln(
+                '${modelA.name!.split('.').last} -- ${modelB.name!.split('.').last}');
           }
         }
       }

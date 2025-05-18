@@ -13,9 +13,6 @@ void main(List<String> args) async {
         help: 'Directory containing .spy.yaml files')
     ..addOption('output',
         abbr: 'o', defaultsTo: 'er_diagram.puml', help: 'Output PlantUML file')
-    ..addOption('yaml-output',
-        defaultsTo: 'all_yaml_content.txt',
-        help: 'Output file for concatenated YAML content')
     ..addOption('config', abbr: 'c', help: 'Path to configuration YAML file')
     ..addFlag('help',
         abbr: 'h', negatable: false, help: 'Show usage information');
@@ -55,7 +52,7 @@ void main(List<String> args) async {
       modelsDirPath: (results['dir'] != config.modelsDirPath)
           ? results['dir']
           : config.modelsDirPath,
-      yamlOutputFile: File(results['yaml-output']),
+
       umlOutputFile: File(results['output']),
     );
 

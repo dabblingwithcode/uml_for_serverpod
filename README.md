@@ -58,14 +58,24 @@ dart run uml_for_serverpod --config=uml_config.yaml
 Example configuration file `uml_config.yaml`:
 
 ```yaml
+# uml_config.yaml - Example configuration file
 printComments: true
+colorfullArrows: true
+useNameSpace: true
+ignoreRootFolder: 'models'
+modelsDirPath: lib/src/models
 commentHexColor: '#93c47d'
 manyHexColor: '#27ae60'
 manyString: 'N'
 oneHexColor: '#9b59b6'
 oneString: '1'
 relationHexColor: '#0164aa'
-classHexColor: '#ff962f'
+packageBackgroundHexColor: '#fff2cc'
+classNameHexColor: '#ffca2b'
+classBackgroundHexColor: '#ff962f'
+classBorderHexColor: '#333333'
+
+
 ```
 
 ## Options
@@ -92,5 +102,7 @@ https://marketplace.visualstudio.com/items/?itemName=jebbs.plantuml
 There are many uml customization options available, you can play around with them:
 
 https://plantuml.com/en-dark/class-diagram
+
+https://plantuml.com/en/commons
 
 You found a way to improve this package? Contributions are very welcome!

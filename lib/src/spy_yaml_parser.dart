@@ -1,12 +1,12 @@
 import 'dart:io';
 
-import 'package:uml_for_serverpod/src/colors.dart';
+import 'package:uml_for_serverpod/src/spy_yaml_parse_helpers.dart';
 import 'package:uml_for_serverpod/uml_for_serverpod.dart';
 
-class YamlParser {
+class SpyYamlParser {
   final UmlConfig config;
   final String modelsDirPath;
-  YamlParser({required this.config, required this.modelsDirPath});
+  SpyYamlParser({required this.config, required this.modelsDirPath});
 
   Future<String> collectYamlContent() async {
     final modelsDir = Directory(modelsDirPath);
@@ -72,13 +72,28 @@ class YamlParser {
       }
 
       if (line.startsWith('class:')) {
-        currentModel!.name = line.substring(6).trim();
+        if (config.useNameSpace) {
+          final nameSpaces = SpyYamlParseHelpers.getNameSpacesFromPath(
+              currentModel!.filepath!, config.ignoreRootFolder);
+          currentModel.name =
+              '${nameSpaces.nameSpace != null ? '${nameSpaces.nameSpace}.' : ''}${nameSpaces.subNameSpace != null ? '${nameSpaces.subNameSpace}.' : ''}${line.substring(6).trim()}';
+        } else {
+          currentModel!.name = line.substring(6).trim();
+        }
+
         currentModel.isEnum = false;
         continue;
       }
 
       if (line.startsWith('enum:')) {
-        currentModel!.name = line.substring(5).trim();
+        if (config.useNameSpace) {
+          final nameSpaces = SpyYamlParseHelpers.getNameSpacesFromPath(
+              currentModel!.filepath!, config.ignoreRootFolder);
+          currentModel.name =
+              '${nameSpaces.nameSpace != null ? '${nameSpaces.nameSpace}.' : ''}${nameSpaces.subNameSpace != null ? '${nameSpaces.subNameSpace}.' : ''}${line.substring(5).trim()}';
+        } else {
+          currentModel!.name = line.substring(5).trim();
+        }
         currentModel.isEnum = true;
         continue;
       }
@@ -140,6 +155,15 @@ class YamlParser {
             final type = typeMatch?.group(2);
             if (type != null) {
               bool isList = rest.contains('List<');
+              final relation = ObjectRelation(
+                  relatedObject: type,
+                  type: isList ? RelationType.one : RelationType.many);
+              if (currentModel.relations == null) {
+                currentModel.relations = [relation];
+              } else {
+                currentModel.relations!.add(relation);
+              }
+
               String arrow = '';
               String right = isList
                   ? '"<b><size:20><color:${config.manyHexColor}><back:white>${config.manyString}</back></color></size></b>"'
@@ -162,9 +186,10 @@ class YamlParser {
               }
               // Check if the relation already exists
               if (!relations.any((r) =>
-                  r.contains(' ${currentModel!.name!} ') && r.contains(type))) {
+                  r.contains(' ${currentModel!.name!.split('.').last} ') &&
+                  r.contains(type))) {
                 relations.add(
-                    ' ${currentModel.name!}::$fieldName $left $arrow $right $type ');
+                    ' ${currentModel.name!.split('.').last}::$fieldName $left $arrow $right $type ');
               }
             }
           }
