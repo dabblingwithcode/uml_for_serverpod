@@ -21,14 +21,12 @@ class UmlGenerator {
     final yamlContent = await spyYamlParser.collectYamlContent();
 
     // 2. Parse YAML content to create UmlModel objects
-    final parsedData = spyYamlParser.parseModels(yamlContent);
 
-    final serverpodObjectsMap = parsedData.serverpodObjects;
-
-    final relations = parsedData.relations;
+    final serverpodObjectsMap =
+        spyYamlParser.parseModels(yamlContent).serverpodObjectsMap;
 
     // 3. Generate UML PlantUML content
-    final umlContent = generateUml(serverpodObjectsMap, relations);
+    final umlContent = generateUml(serverpodObjectsMap);
 
     // 4. Write UML content to output file
     final umlFile = File(config.umlOutputFile!);
@@ -38,13 +36,13 @@ class UmlGenerator {
     return;
   }
 
-  String generateUml(
-      Map<String, UmlObject> objectsMap, List<String> relations) {
+  String generateUml(Map<String, UmlObject> objectsMap) {
     final umlBuffer = StringBuffer();
     // Add the UML style block
     umlBuffer.writeln('@startuml');
     umlBuffer.writeln(UmlStyleBlock.generateUmlStyleBlock(config));
 
+    List<ObjectRelation> relations = [];
     // Generate objects
 
     for (UmlObject object in objectsMap.values) {
@@ -52,8 +50,7 @@ class UmlGenerator {
       final filepath = object.filepath!;
 
       // declare the object type and name
-      final objectDeclaration =
-          UmlHelpers.getObjectDeclaration(object, config.useNameSpace);
+      final objectDeclaration = UmlHelpers.getObjectDeclaration(object, config);
       umlBuffer.writeln(objectDeclaration);
 
       // Add the filepath
@@ -61,41 +58,26 @@ class UmlGenerator {
       // Add a separator
       umlBuffer.writeln('--');
 
+      // Add fields
       switch (objectType) {
         case ObjectType.classType:
         case ObjectType.databaseClassType:
         case ObjectType.exceptionType:
           if (object.fields != null) {
-            object.fields!.forEach((k, v) {
-              String fieldsLine = '';
-              if (v.contains('relation')) {
-                fieldsLine =
-                    ' ➡️ <i>$k</i> : <b><color:${config.classNameHexColor}>${v.split(',')[0]}</color></b> ${v.split(',')[1].replaceFirst('relation', '<b><color:${config.relationHexColor}>relation</color></b>')} ';
-              } else if (k.contains('##') & config.printComments) {
-                fieldsLine = '<color:${config.commentHexColor}>$k</color>';
-              } else if (k.contains('##') & !config.printComments) {
-                return;
-              } else if (k.contains('indexes:')) {
-                umlBuffer.writeln('--');
-                fieldsLine =
-                    '<b><color:${config.relationHexColor}>$k</color></b>';
-              } else if (k.contains('idx:')) {
-                fieldsLine =
-                    '<b><color:${config.relationHexColor}>$k</color></b>';
-              } else if (k.contains('unique')) {
-                fieldsLine =
-                    '<b><color:${config.relationHexColor}>$k</color></b>: <b><color:${config.classNameHexColor}>$v</color></b>';
-              } else {
-                fieldsLine =
-                    '  <i>$k</i>: <b><color:${config.classNameHexColor}>$v</color></b>';
+            for (var entry in object.fields!.entries) {
+              final key = entry.key;
+              final value = entry.value;
+              final fieldLine = UmlHelpers.formatFieldLine(key, value, config);
+              if (fieldLine != null) {
+                umlBuffer.writeln(fieldLine);
               }
-              umlBuffer.writeln(fieldsLine);
-            });
+            }
           }
 
           umlBuffer.writeln('}');
 
           break;
+
         case ObjectType.enumType:
           if (object.enumSerialized != null) {
             umlBuffer.writeln('  serialized: ${object.enumSerialized}');
@@ -109,21 +91,28 @@ class UmlGenerator {
         case null:
           throw Exception('Object type is null for object: ${object.name}');
       }
-    }
+      // Add relations
 
-    umlBuffer.writeln();
+      for (final ObjectRelation relation in object.relations ?? []) {
+        // If the other side of the relation is not in the list, add it
+        if (!relations.any((r) =>
+            r.objectName == relation.relatedObject &&
+            r.relatedObject == relation.objectName)) {
+          relations.add(relation);
+        }
+      }
+    }
 
     // Generate relationships
 
-    for (var rel in relations) {
-      // TODO: Why is this needed?
-      var fixedRel = rel.replaceAllMapped(
-        RegExp(r'List<([A-Za-z0-9_]+)>'),
-        (m) => m.group(1) as String,
-      );
-
-      umlBuffer.writeln(fixedRel);
+    final umlObjectRelationLines = UmlHelpers.getUmlObjectRelationLines(
+      config,
+      relations,
+    );
+    for (final line in umlObjectRelationLines) {
+      umlBuffer.writeln(line);
     }
+    umlBuffer.writeln();
 
     // Add implicit relationships
     for (var entryA in objectsMap.entries) {
@@ -131,21 +120,20 @@ class UmlGenerator {
       if (modelA.fields != null) {
         for (var entryB in objectsMap.entries) {
           final modelB = entryB.value;
-          if (modelA.name!.split('.').last == modelB.name!.split('.').last) {
+          // skip self-references
+          if (modelA.name! == modelB.name!) {
             continue;
           }
-          // skip self
+
           final found = modelA.fields!.entries.any((field) {
             final fieldValue = field.value;
             return !fieldValue.contains('relation') &&
-                (fieldValue == modelB.name!.split('.').last ||
-                    fieldValue.contains('${modelB.name!.split('.').last}?') ||
-                    fieldValue
-                        .contains('List<${modelB.name!.split('.').last}>'));
+                (fieldValue == modelB.name! ||
+                    fieldValue.contains(modelB.name!) ||
+                    fieldValue.contains('List<${modelB.name!}>'));
           });
           if (found) {
-            umlBuffer.writeln(
-                '${modelA.name!.split('.').last} -- ${modelB.name!.split('.').last}');
+            umlBuffer.writeln('${modelA.name!} -- ${modelB.name!}');
           }
         }
       }

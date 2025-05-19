@@ -1,9 +1,13 @@
 /// Model classes for UML generation
 class ObjectRelation {
+  String? objectName;
+  String? fieldName;
   String? relatedObject;
   RelationType? type;
 
   ObjectRelation({
+    this.objectName,
+    this.fieldName,
     this.relatedObject,
     this.type,
   });
@@ -77,7 +81,8 @@ class UmlConfig {
   final String classNameHexColor;
   final String classBorderHexColor;
   final String classBackgroundHexColor;
-  final String packageBackgroundHexColor;
+  final String namespaceBackgroundHexColor;
+  final String? namespaceBorderHexColor;
 
   UmlConfig({
     this.printComments = true,
@@ -95,7 +100,8 @@ class UmlConfig {
     this.classNameHexColor = '#ff962f',
     this.classBorderHexColor = '#333333',
     this.classBackgroundHexColor = '#EEEEEE',
-    this.packageBackgroundHexColor = '#DDDDDD',
+    this.namespaceBackgroundHexColor = '#DDDDDD',
+    this.namespaceBorderHexColor = '#333333',
   });
 
   // Add this method to your UmlConfig class
@@ -115,7 +121,8 @@ class UmlConfig {
     String? classNameHexColor,
     String? classBorderHexColor,
     String? classBackgroundHexColor,
-    String? packageBackgroundHexColor,
+    String? namespaceBackgroundHexColor,
+    String? namespaceBorderHexColor,
   }) {
     return UmlConfig(
       printComments: printComments ?? this.printComments,
@@ -134,8 +141,10 @@ class UmlConfig {
       classBorderHexColor: classBorderHexColor ?? this.classBorderHexColor,
       classBackgroundHexColor:
           classBackgroundHexColor ?? this.classBackgroundHexColor,
-      packageBackgroundHexColor:
-          packageBackgroundHexColor ?? this.packageBackgroundHexColor,
+      namespaceBackgroundHexColor:
+          namespaceBackgroundHexColor ?? this.namespaceBackgroundHexColor,
+      namespaceBorderHexColor:
+          namespaceBorderHexColor ?? this.namespaceBorderHexColor,
     );
   }
 
@@ -156,7 +165,9 @@ class UmlConfig {
       classNameHexColor: map['classNameHexColor'] ?? '#ff962f',
       classBorderHexColor: map['classBorderHexColor'] ?? '#333333',
       classBackgroundHexColor: map['classBackgroundHexColor'] ?? '#EEEEEE',
-      packageBackgroundHexColor: map['packageBackgroundHexColor'] ?? '#DDDDDD',
+      namespaceBackgroundHexColor:
+          map['namespaceBackgroundHexColor'] ?? '#DDDDDD',
+      namespaceBorderHexColor: map['namespaceBorderHexColor'] ?? '#333333',
     );
   }
 }

@@ -21,12 +21,16 @@ classDiagram {
   FontSize 13
   FontStyle Regular
   package {
+    Padding 20 20 20 20
+    LineColor ${config.namespaceBorderHexColor}
+    LineThickness 3
     FontSize 12
-    BackgroundColor ${config.packageBackgroundHexColor}
-        title {
-          FontSize 36
-          FontStyle bold
-        }
+    BackgroundColor ${config.namespaceBackgroundHexColor}
+    title {
+      Padding 10 10 10 10
+      FontSize 36
+      FontStyle bold
+    }
   }    
   class {
     Padding 10 10 10 10
@@ -34,9 +38,10 @@ classDiagram {
         header {
           FontSize 36
           FontStyle bold
-        }
+        } 
   }
 }
+
 </style>
  ''';
   }

@@ -13,7 +13,7 @@ void main(List<String> args) async {
     ..addOption('config', abbr: 'c', help: 'Path to configuration YAML file')
     ..addFlag('help',
         abbr: 'h', negatable: false, help: 'Show usage information');
-
+  stdout.writeln('UML Generator for Serverpod YAML models \n');
   try {
     final results = parser.parse(args);
 
@@ -53,7 +53,8 @@ void main(List<String> args) async {
 
     await generator.generate();
 
-    stdout.writeln('✅ Done! UML diagram created at ${config.umlOutputFile}');
+    stdout
+        .writeln('✅ Done! UML diagram created at ${config.umlOutputFile} 🗺️');
   } catch (e) {
     stdout.writeln('❌ Error: $e');
     printUsage(parser);

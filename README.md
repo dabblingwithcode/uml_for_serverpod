@@ -5,7 +5,7 @@
 
 Generate PlantUML diagrams from your serverpod `.spy.yaml` model files.
 
-![Example UML Diagram with Colored Arrows](https://github.com/dabblingwithcode/uml_for_serverpod/blob/main/images/diagram_color_arrows.png)
+![Example UML Diagram with Colored Arrows](images/diagram_color_arrows.png)
 
 ## Installation
 
@@ -17,7 +17,7 @@ Or add to your project's pubspec.yaml:
 
 ```yaml
 dependencies:
-  uml_generator: ^0.0.4
+  uml_generator: ^0.0.4+1
 ```
 
 ## Usage
@@ -63,7 +63,8 @@ manyString: 'N'
 oneHexColor: '#9b59b6'
 oneString: '1'
 relationHexColor: '#0164aa'
-packageBackgroundHexColor: '#fff2cc'
+namespaceBackgroundHexColor: '#fff2cc'
+namespaceBorderHexColor: '#33333'
 classNameHexColor: '#ff962f'
 classBackgroundHexColor: '#eee'
 classBorderHexColor: '#333333'
@@ -104,19 +105,19 @@ Future<void> main() async {
 ```
 
 
-
-
-
 ## Visualize your .puml file
 
-You can visualize your .puml file pasting the code here:
-
-https://editor.plantuml.com/
-
-If you are using vscode, there is also an extension:
+The best way to visualize the diagram, provided that you use vscode, is this extension:
 
 https://marketplace.visualstudio.com/items/?itemName=jebbs.plantuml
 
+There might be plantuml extensions for other IDEs.
+
+You can also visualize your .puml file pasting the code here:
+
+https://editor.plantuml.com/
+
+However, long files might not render in the online editor (but do render using the extension 🤷‍♂️).
 
 ## Customize / contribute
 

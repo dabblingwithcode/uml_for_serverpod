@@ -1,3 +1,10 @@
+## 0.0.4+1
+
+* Fix namespace orphan dot.
+* Add namespace border color to config.
+* Refactor.
+* Update `README.md`
+
 ## 0.0.4
 
 * Added exceptions.
@@ -20,4 +27,4 @@
 
 ## 0.0.1
 
-* TODO: Describe initial release.
+* Initial release.

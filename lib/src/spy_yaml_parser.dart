@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:uml_for_serverpod/src/colors.dart';
 import 'package:uml_for_serverpod/src/models.dart';
 
 class SpyYamlParser {
@@ -31,16 +30,17 @@ class SpyYamlParser {
     return yamlBuffer.toString();
   }
 
-  ({Map<String, UmlObject> serverpodObjects, List<String> relations})
-      parseModels(String content) {
-    final objetcs = <String, UmlObject>{};
-    final relations = <String>[];
+  ({Map<String, UmlObject> serverpodObjectsMap}) parseModels(String content) {
+    final objectsMap = <String, UmlObject>{};
 
     final lines = content.split('\n');
+
     UmlObject? currentModel;
-    int? lastArrowIndex;
+
     Map<String, String> currentFields = {};
+
     bool collectingEnumValues = false;
+
     List<String> enumValues = [];
 
     for (int i = 0; i < lines.length; i++) {
@@ -63,7 +63,7 @@ class SpyYamlParser {
             currentModel.fields = Map.of(currentFields);
           }
           // save the finished model in the classes map
-          objetcs[currentModel.name!] = currentModel;
+          objectsMap[currentModel.name!] = currentModel;
           // reset the current model
           collectingEnumValues = false;
           currentFields.clear();
@@ -128,9 +128,15 @@ class SpyYamlParser {
         }
       }
       if (line.startsWith('##')) {
-        // TODO: This might get buggy if two commments have the same string
         // pass comments as key to the fields, we don't need a value
-        currentFields[line] = '';
+        // We use a check in case there are multiple comment lines
+        // in the object with the exact same text
+        // Then we add a space to the end of the line to make it unique
+        if (currentFields.containsKey(line)) {
+          currentFields['$line '] = '';
+        } else {
+          currentFields[line] = '';
+        }
         continue;
       }
 
@@ -161,6 +167,8 @@ class SpyYamlParser {
           if (type != null) {
             bool isList = rest.contains('List<');
             final relation = ObjectRelation(
+                objectName: currentModel.name,
+                fieldName: fieldName,
                 relatedObject: type,
                 type: isList ? RelationType.one : RelationType.many);
             if (currentModel.relations == null) {
@@ -168,54 +176,21 @@ class SpyYamlParser {
             } else {
               currentModel.relations!.add(relation);
             }
-            // TODO: This should be done in the UML generator
-            String arrow = '';
-            String right = isList
-                ? '"<b><size:20><color:${config.manyHexColor}><back:white>${config.manyString}</back></color></size></b>"'
-                : '"<b><size:20><color:${config.oneHexColor}><back:white>${config.oneString}</back></color></size></b>"';
-            String left = isList
-                ? '"<b><size:20><color:${config.oneHexColor}><back:white>${config.oneString}</back></color></size></b>"'
-                : '"<b><size:20><color:${config.manyHexColor}><back:white>${config.manyString}</back></color></size></b>"';
-            if (config.colorfullArrows) {
-              final arrowColors = colorPalette;
-              lastArrowIndex = lastArrowIndex ?? 0;
-              final colorIndex = lastArrowIndex % arrowColors.length;
-              final selectedColor = arrowColors.elementAt(colorIndex);
-              lastArrowIndex++; // Increment for next use
-              arrow = isList
-                  ? '<-[$selectedColor,thickness=4]-'
-                  : '-[$selectedColor,thickness=4]->';
-            } else {
-              arrow = isList ? '<-[#333333,thickness=4]-' : '-[thickness=4]->';
-            }
-            // Check if the relation already exists
-
-            if (!relations.any(
-                (r) => r.contains(currentModel!.name!) && r.contains(type))) {
-              relations.add(
-                  ' ${currentModel.name!.split('.').last}::$fieldName $left $arrow $right $type ');
-            }
           }
         }
       }
     }
 
     // Save the last object
-    if (currentModel != null) {
-      if (currentModel.objectType == ObjectType.enumType &&
-          enumValues.isNotEmpty) {
-        currentModel.enumValues = enumValues.join(', ');
-      }
-      if (currentFields.isNotEmpty) {
-        currentModel.fields = Map.of(currentFields);
-      }
-      objetcs[currentModel.name!] = currentModel;
+    if (currentModel!.objectType == ObjectType.enumType &&
+        enumValues.isNotEmpty) {
+      currentModel.enumValues = enumValues.join(', ');
     }
-    stdout.writeln(
-        '⚙️  Parsed ${objetcs.length} classes and ${relations.length} relations');
-    return (
-      serverpodObjects: objetcs,
-      relations: relations,
-    );
+    if (currentFields.isNotEmpty) {
+      currentModel.fields = Map.of(currentFields);
+    }
+    objectsMap[currentModel.name!] = currentModel;
+    stdout.writeln('⚙️  Parsed ${objectsMap.length} objects.');
+    return (serverpodObjectsMap: objectsMap);
   }
 }
