@@ -1,18 +1,15 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:uml_for_serverpod/src/models.dart';
 import 'package:uml_for_serverpod/uml_for_serverpod.dart';
 import 'package:yaml/yaml.dart';
 
 void main(List<String> args) async {
   // Parse command line arguments
   final parser = ArgParser()
-    ..addOption('dir',
-        abbr: 'd',
-        defaultsTo: 'lib',
-        help: 'Directory containing .spy.yaml files')
-    ..addOption('output',
-        abbr: 'o', defaultsTo: 'er_diagram.puml', help: 'Output PlantUML file')
+    ..addOption('dir', abbr: 'd', help: 'Directory containing .spy.yaml files')
+    ..addOption('output', abbr: 'o', help: 'Output PlantUML file')
     ..addOption('config', abbr: 'c', help: 'Path to configuration YAML file')
     ..addFlag('help',
         abbr: 'h', negatable: false, help: 'Show usage information');
@@ -45,20 +42,18 @@ void main(List<String> args) async {
         stdout.writeln('⚠️ Warning: Configuration file not found: $configPath');
       }
     }
+    if (results['dir'] != null) {
+      config = config.copyWith(modelsDirPath: results['dir']);
+    }
+    if (results['output'] != null) {
+      config = config.copyWith(umlOutputFile: results['output']);
+    }
 
-    final generator = UmlGenerator(
-      config: config,
-      // TODO: Fix this
-      modelsDirPath: (results['dir'] != config.modelsDirPath)
-          ? results['dir']
-          : config.modelsDirPath,
-
-      umlOutputFile: File(results['output']),
-    );
+    final generator = UmlGenerator(config: config);
 
     await generator.generate();
 
-    stdout.writeln('✅ Done! UML diagram created at ${results['output']}');
+    stdout.writeln('✅ Done! UML diagram created at ${config.umlOutputFile}');
   } catch (e) {
     stdout.writeln('❌ Error: $e');
     printUsage(parser);

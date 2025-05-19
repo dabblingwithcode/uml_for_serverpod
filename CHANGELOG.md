@@ -1,3 +1,9 @@
+## 0.0.4
+
+* Added exceptions.
+* Refactor.
+* Update `README.md`
+
 ## 0.0.3
 
 * Added color configuration options.

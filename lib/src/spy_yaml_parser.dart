@@ -1,15 +1,15 @@
 import 'dart:io';
 
-import 'package:uml_for_serverpod/src/spy_yaml_parse_helpers.dart';
-import 'package:uml_for_serverpod/uml_for_serverpod.dart';
+import 'package:uml_for_serverpod/src/colors.dart';
+import 'package:uml_for_serverpod/src/models.dart';
 
 class SpyYamlParser {
   final UmlConfig config;
-  final String modelsDirPath;
-  SpyYamlParser({required this.config, required this.modelsDirPath});
+
+  SpyYamlParser({required this.config});
 
   Future<String> collectYamlContent() async {
-    final modelsDir = Directory(modelsDirPath);
+    final modelsDir = Directory(config.modelsDirPath!);
     final yamlFiles = <File>[];
     await for (var entity
         in modelsDir.list(recursive: true, followLinks: false)) {
@@ -26,15 +26,18 @@ class SpyYamlParser {
       yamlBuffer.writeln();
     }
 
+    stdout.writeln(
+        '👓️🚀 Read ${yamlFiles.length} Serverpod .spy.yaml files in ${modelsDir.path}');
     return yamlBuffer.toString();
   }
 
-  Map<String, dynamic> parseYamlContent(String content) {
-    final classes = <String, UmlModel>{};
+  ({Map<String, UmlObject> serverpodObjects, List<String> relations})
+      parseModels(String content) {
+    final objetcs = <String, UmlObject>{};
     final relations = <String>[];
 
     final lines = content.split('\n');
-    UmlModel? currentModel;
+    UmlObject? currentModel;
     int? lastArrowIndex;
     Map<String, String> currentFields = {};
     bool collectingEnumValues = false;
@@ -50,77 +53,82 @@ class SpyYamlParser {
         // and we need to save it
         if (currentModel != null) {
           // collect the enum values
-          if (currentModel.isEnum == true && enumValues.isNotEmpty) {
+          if (currentModel.objectType == ObjectType.enumType &&
+              enumValues.isNotEmpty) {
             currentModel.enumValues = enumValues.join(', ');
             enumValues.clear();
           }
-          // save the finished model in the classes map
+          // collect the fields value
           if (currentFields.isNotEmpty) {
             currentModel.fields = Map.of(currentFields);
           }
           // save the finished model in the classes map
-          classes[currentModel.name!] = currentModel;
+          objetcs[currentModel.name!] = currentModel;
+          // reset the current model
           collectingEnumValues = false;
           currentFields.clear();
         }
         // reset the current model
-        currentModel = UmlModel(
+        currentModel = UmlObject(
           filepath: line.substring(9).trim(),
           fields: {},
+          relations: [],
         );
+        currentFields = {};
         continue;
       }
 
       if (line.startsWith('class:')) {
-        if (config.useNameSpace) {
-          final nameSpaces = SpyYamlParseHelpers.getNameSpacesFromPath(
-              currentModel!.filepath!, config.ignoreRootFolder);
-          currentModel.name =
-              '${nameSpaces.nameSpace != null ? '${nameSpaces.nameSpace}.' : ''}${nameSpaces.subNameSpace != null ? '${nameSpaces.subNameSpace}.' : ''}${line.substring(6).trim()}';
-        } else {
-          currentModel!.name = line.substring(6).trim();
-        }
+        currentModel!.objectType = ObjectType.classType;
 
-        currentModel.isEnum = false;
+        currentModel.name = line.split(':').last.trim();
+
         continue;
       }
+      // Check for table name
+      if (line.startsWith('table:')) {
+        currentModel!.objectType = ObjectType.databaseClassType;
 
+        currentModel.tableName = line.split(':').last.trim();
+
+        continue;
+      }
       if (line.startsWith('enum:')) {
-        if (config.useNameSpace) {
-          final nameSpaces = SpyYamlParseHelpers.getNameSpacesFromPath(
-              currentModel!.filepath!, config.ignoreRootFolder);
-          currentModel.name =
-              '${nameSpaces.nameSpace != null ? '${nameSpaces.nameSpace}.' : ''}${nameSpaces.subNameSpace != null ? '${nameSpaces.subNameSpace}.' : ''}${line.substring(5).trim()}';
-        } else {
-          currentModel!.name = line.substring(5).trim();
-        }
-        currentModel.isEnum = true;
+        currentModel!.objectType = ObjectType.enumType;
+
+        currentModel.name = line.split(':').last.trim();
+
         continue;
       }
+      if (line.startsWith('exception:')) {
+        currentModel!.objectType = ObjectType.exceptionType;
+
+        currentModel.name = line.split(':').last.trim();
+
+        continue;
+      }
+
       // Check for enum serialized value
-      if (currentModel!.isEnum == true && line.startsWith('serialized:')) {
-        currentModel.enumSerialized = line.substring(12).trim();
+      if (currentModel!.objectType == ObjectType.enumType &&
+          line.startsWith('serialized:')) {
+        currentModel.enumSerialized = line.split(':').last.trim();
         continue;
       }
       // Check for enum names
-      if (currentModel.isEnum == true &&
-          line.trimLeft().startsWith('values:')) {
+      if (currentModel.objectType == ObjectType.enumType &&
+          line.startsWith('values:')) {
         enumValues.clear();
         collectingEnumValues = true;
         continue;
       }
-
       if (collectingEnumValues) {
         if (line.trimLeft().startsWith('- ')) {
           enumValues.add(line.trimLeft().substring(2).trim());
           continue;
-        } else if (line.trim().isEmpty) {
-          collectingEnumValues = false;
-          continue;
         }
       }
-
       if (line.startsWith('##')) {
+        // TODO: This might get buggy if two commments have the same string
         // pass comments as key to the fields, we don't need a value
         currentFields[line] = '';
         continue;
@@ -136,61 +144,56 @@ class SpyYamlParser {
       if (line.startsWith('fields:')) {
         continue;
       }
-      // Check for table name
-      if (line.startsWith('table:')) {
-        currentModel.tableName = line.substring(6).trim();
-        continue;
-      }
+
+      // We catched all other line options, this should be a field
       // Check for field name and type
-      if (line.contains(':') && currentModel.isEnum != true) {
+      if (line.contains(':') &&
+          currentModel.objectType != ObjectType.enumType) {
         final parts = line.split(':');
-        if (parts.length >= 2) {
-          final fieldName = parts[0].trim();
-          final rest = parts.sublist(1).join(':').trim();
-          currentFields[fieldName] = rest;
 
-          if (rest.contains('relation')) {
-            final typeMatch =
-                RegExp(r'(List<)?([A-Za-z0-9_]+)').firstMatch(rest);
-            final type = typeMatch?.group(2);
-            if (type != null) {
-              bool isList = rest.contains('List<');
-              final relation = ObjectRelation(
-                  relatedObject: type,
-                  type: isList ? RelationType.one : RelationType.many);
-              if (currentModel.relations == null) {
-                currentModel.relations = [relation];
-              } else {
-                currentModel.relations!.add(relation);
-              }
+        final fieldName = parts[0].trim();
+        final rest = parts.sublist(1).join(':').trim();
+        currentFields[fieldName] = rest;
 
-              String arrow = '';
-              String right = isList
-                  ? '"<b><size:20><color:${config.manyHexColor}><back:white>${config.manyString}</back></color></size></b>"'
-                  : '"<b><size:20><color:${config.oneHexColor}><back:white>${config.oneString}</back></color></size></b>"';
-              String left = isList
-                  ? '"<b><size:20><color:${config.oneHexColor}><back:white>${config.oneString}</back></color></size></b>"'
-                  : '"<b><size:20><color:${config.manyHexColor}><back:white>${config.manyString}</back></color></size></b>"';
-              if (config.colorfullArrows) {
-                final arrowColors = colorPalette;
-                lastArrowIndex = lastArrowIndex ?? 0;
-                final colorIndex = lastArrowIndex % arrowColors.length;
-                final selectedColor = arrowColors.elementAt(colorIndex);
-                lastArrowIndex++; // Increment for next use
-                arrow = isList
-                    ? '<-[$selectedColor,thickness=4]-'
-                    : '-[$selectedColor,thickness=4]->';
-              } else {
-                arrow =
-                    isList ? '<-[#333333,thickness=4]-' : '-[thickness=4]->';
-              }
-              // Check if the relation already exists
-              if (!relations.any((r) =>
-                  r.contains(' ${currentModel!.name!.split('.').last} ') &&
-                  r.contains(type))) {
-                relations.add(
-                    ' ${currentModel.name!.split('.').last}::$fieldName $left $arrow $right $type ');
-              }
+        if (rest.contains('relation')) {
+          final typeMatch = RegExp(r'(List<)?([A-Za-z0-9_]+)').firstMatch(rest);
+          final type = typeMatch?.group(2);
+          if (type != null) {
+            bool isList = rest.contains('List<');
+            final relation = ObjectRelation(
+                relatedObject: type,
+                type: isList ? RelationType.one : RelationType.many);
+            if (currentModel.relations == null) {
+              currentModel.relations = [relation];
+            } else {
+              currentModel.relations!.add(relation);
+            }
+            // TODO: This should be done in the UML generator
+            String arrow = '';
+            String right = isList
+                ? '"<b><size:20><color:${config.manyHexColor}><back:white>${config.manyString}</back></color></size></b>"'
+                : '"<b><size:20><color:${config.oneHexColor}><back:white>${config.oneString}</back></color></size></b>"';
+            String left = isList
+                ? '"<b><size:20><color:${config.oneHexColor}><back:white>${config.oneString}</back></color></size></b>"'
+                : '"<b><size:20><color:${config.manyHexColor}><back:white>${config.manyString}</back></color></size></b>"';
+            if (config.colorfullArrows) {
+              final arrowColors = colorPalette;
+              lastArrowIndex = lastArrowIndex ?? 0;
+              final colorIndex = lastArrowIndex % arrowColors.length;
+              final selectedColor = arrowColors.elementAt(colorIndex);
+              lastArrowIndex++; // Increment for next use
+              arrow = isList
+                  ? '<-[$selectedColor,thickness=4]-'
+                  : '-[$selectedColor,thickness=4]->';
+            } else {
+              arrow = isList ? '<-[#333333,thickness=4]-' : '-[thickness=4]->';
+            }
+            // Check if the relation already exists
+
+            if (!relations.any(
+                (r) => r.contains(currentModel!.name!) && r.contains(type))) {
+              relations.add(
+                  ' ${currentModel.name!.split('.').last}::$fieldName $left $arrow $right $type ');
             }
           }
         }
@@ -199,18 +202,20 @@ class SpyYamlParser {
 
     // Save the last object
     if (currentModel != null) {
-      if (currentModel.isEnum == true && enumValues.isNotEmpty) {
+      if (currentModel.objectType == ObjectType.enumType &&
+          enumValues.isNotEmpty) {
         currentModel.enumValues = enumValues.join(', ');
       }
       if (currentFields.isNotEmpty) {
         currentModel.fields = Map.of(currentFields);
       }
-      classes[currentModel.name!] = currentModel;
+      objetcs[currentModel.name!] = currentModel;
     }
-
-    return {
-      'classes': classes,
-      'relations': relations,
-    };
+    stdout.writeln(
+        '⚙️  Parsed ${objetcs.length} classes and ${relations.length} relations');
+    return (
+      serverpodObjects: objetcs,
+      relations: relations,
+    );
   }
 }

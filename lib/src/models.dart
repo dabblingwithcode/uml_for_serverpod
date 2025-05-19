@@ -14,10 +14,31 @@ enum RelationType {
   many,
 }
 
-class UmlModel {
-  bool? isEnum;
+enum ClassProperty {
+  table,
+  serverOnly,
+}
+
+enum EnumProperty {
+  enumSerialized,
+  enumDefault,
+}
+
+enum ObjectType {
+  classType('class'),
+  databaseClassType('entity'),
+  enumType('enum'),
+  exceptionType('exception');
+
+  final String value;
+  const ObjectType(this.value);
+}
+
+class UmlObject {
+  ObjectType? objectType;
   String? filepath;
   String? tableName;
+
   String? name;
   Map<String, String>? fields;
   String? enumSerialized;
@@ -25,8 +46,8 @@ class UmlModel {
   String? enumValues;
   List<ObjectRelation>? relations;
 
-  UmlModel({
-    this.isEnum,
+  UmlObject({
+    this.objectType,
     this.filepath,
     this.tableName,
     this.name,
@@ -43,7 +64,9 @@ class UmlConfig {
   final bool printComments;
   final bool colorfullArrows;
   final bool useNameSpace;
-  final String modelsDirPath;
+  final String? modelsDirPath;
+  final String? umlOutputFile;
+
   final String? ignoreRootFolder;
   final String commentHexColor;
   final String manyHexColor;
@@ -61,6 +84,7 @@ class UmlConfig {
     this.colorfullArrows = true,
     this.useNameSpace = true,
     this.modelsDirPath = 'lib',
+    this.umlOutputFile = 'serverpod_uml_diagram.puml',
     this.ignoreRootFolder,
     this.commentHexColor = '#93c47d',
     this.manyHexColor = '#27ae60',
@@ -74,12 +98,54 @@ class UmlConfig {
     this.packageBackgroundHexColor = '#DDDDDD',
   });
 
+  // Add this method to your UmlConfig class
+  UmlConfig copyWith({
+    bool? printComments,
+    bool? colorfullArrows,
+    bool? useNameSpace,
+    String? modelsDirPath,
+    String? umlOutputFile,
+    String? ignoreRootFolder,
+    String? commentHexColor,
+    String? manyHexColor,
+    String? manyString,
+    String? oneHexColor,
+    String? oneString,
+    String? relationHexColor,
+    String? classNameHexColor,
+    String? classBorderHexColor,
+    String? classBackgroundHexColor,
+    String? packageBackgroundHexColor,
+  }) {
+    return UmlConfig(
+      printComments: printComments ?? this.printComments,
+      colorfullArrows: colorfullArrows ?? this.colorfullArrows,
+      useNameSpace: useNameSpace ?? this.useNameSpace,
+      modelsDirPath: modelsDirPath ?? this.modelsDirPath,
+      umlOutputFile: umlOutputFile ?? this.umlOutputFile,
+      ignoreRootFolder: ignoreRootFolder ?? this.ignoreRootFolder,
+      commentHexColor: commentHexColor ?? this.commentHexColor,
+      manyHexColor: manyHexColor ?? this.manyHexColor,
+      manyString: manyString ?? this.manyString,
+      oneHexColor: oneHexColor ?? this.oneHexColor,
+      oneString: oneString ?? this.oneString,
+      relationHexColor: relationHexColor ?? this.relationHexColor,
+      classNameHexColor: classNameHexColor ?? this.classNameHexColor,
+      classBorderHexColor: classBorderHexColor ?? this.classBorderHexColor,
+      classBackgroundHexColor:
+          classBackgroundHexColor ?? this.classBackgroundHexColor,
+      packageBackgroundHexColor:
+          packageBackgroundHexColor ?? this.packageBackgroundHexColor,
+    );
+  }
+
   factory UmlConfig.fromMap(Map<String, dynamic> map) {
     return UmlConfig(
       printComments: map['printComments'] ?? true,
       colorfullArrows: map['colorfullArrows'] ?? true,
       useNameSpace: map['useNameSpace'] ?? true,
       modelsDirPath: map['modelsDirPath'] ?? 'lib',
+      umlOutputFile: map['umlOutputFile'] ?? 'er_diagram.puml',
       ignoreRootFolder: map['ignoreRootFolder'],
       commentHexColor: map['commentHexColor'] ?? '#93c47d',
       manyHexColor: map['manyHexColor'] ?? '#27ae60',
