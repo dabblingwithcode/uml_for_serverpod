@@ -117,14 +117,20 @@ You can also visualize your .puml file pasting the code here:
 
 https://editor.plantuml.com/
 
-However, long files might not render in the online editor (but do render using the extension 🤷‍♂️).
+However, long files might not render in the online editor (at least mine doesn't), but do render using the extension 🤷‍♂️.
 
 ## Customize / contribute
 
-There are many uml customization options available, you can play around with them:
+There are many uml customization options available, you can play around with them in your generated .puml file:
+
+https://plantuml.com/en/skinparam
+
+https://plantuml.com/en/style
 
 https://plantuml.com/en-dark/class-diagram
 
 https://plantuml.com/en/commons
+
+**Notice**: `skinparam` has been deprecated and styles should be migrated to the `<style>` api.
 
 You found a way to improve this package? Contributions are very welcome!

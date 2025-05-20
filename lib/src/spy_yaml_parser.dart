@@ -10,10 +10,11 @@ class SpyYamlParser {
   Future<String> collectYamlContent() async {
     final modelsDir = Directory(config.modelsDirPath!);
     final yamlFiles = <File>[];
-    await for (var entity
+    await for (var serverpodObject
         in modelsDir.list(recursive: true, followLinks: false)) {
-      if (entity is File && entity.path.endsWith('.spy.yaml')) {
-        yamlFiles.add(entity);
+      if (serverpodObject is File &&
+          serverpodObject.path.endsWith('.spy.yaml')) {
+        yamlFiles.add(serverpodObject);
       }
     }
 

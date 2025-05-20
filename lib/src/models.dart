@@ -30,7 +30,7 @@ enum EnumProperty {
 
 enum ObjectType {
   classType('class'),
-  databaseClassType('entity'),
+  databaseClassType('class'),
   enumType('enum'),
   exceptionType('exception');
 
@@ -65,18 +65,26 @@ class UmlObject {
 
 // Add this class to models.dart
 class UmlConfig {
-  final bool printComments;
-  final bool colorfullArrows;
-  final bool useNameSpace;
+  // input/output paths
   final String? modelsDirPath;
   final String? umlOutputFile;
 
+  // comments / colorful arrows options
+  final bool printComments;
+  final bool colorfullArrows;
+
+  // namespace options
+  final bool useNameSpace;
   final String? ignoreRootFolder;
+
+  // defain one and many strings for the arrows
+  final String oneString;
+  final String manyString;
+
+  // custom colors
   final String commentHexColor;
   final String manyHexColor;
-  final String manyString;
   final String oneHexColor;
-  final String oneString;
   final String relationHexColor;
   final String classNameHexColor;
   final String classBorderHexColor;

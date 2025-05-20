@@ -1,11 +1,12 @@
 import 'package:uml_for_serverpod/src/models.dart';
 
+// should migrate skinparam to style: https://plantuml.com/en/style
 class UmlStyleBlock {
   static String generateUmlStyleBlock(UmlConfig config) {
     return '''
 left to right direction
+skinparam nodesep 10
 skinparam ranksep 100
-skinparam nodesep 80
 skinparam attributeFontSize 14
 skinparam class {
   BackgroundColor ${config.classBackgroundHexColor}

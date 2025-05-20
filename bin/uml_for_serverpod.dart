@@ -13,7 +13,8 @@ void main(List<String> args) async {
     ..addOption('config', abbr: 'c', help: 'Path to configuration YAML file')
     ..addFlag('help',
         abbr: 'h', negatable: false, help: 'Show usage information');
-  stdout.writeln('UML Generator for Serverpod YAML models \n');
+  stdout.writeln(
+      '\n\x1B[1mUML Diagram Generator for Serverpod YAML models\x1B[0m \n');
   try {
     final results = parser.parse(args);
 
