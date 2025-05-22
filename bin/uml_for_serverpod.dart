@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:uml_for_serverpod/src/models.dart';
+import 'package:uml_for_serverpod/src/yaml/yaml_config_decoder.dart';
 import 'package:uml_for_serverpod/uml_for_serverpod.dart';
-import 'package:yaml/yaml.dart';
 
 void main(List<String> args) async {
   // Parse command line arguments
@@ -13,9 +13,11 @@ void main(List<String> args) async {
     ..addOption('config', abbr: 'c', help: 'Path to configuration YAML file')
     ..addFlag('help',
         abbr: 'h', negatable: false, help: 'Show usage information');
-  stdout.writeln(
-      '\n\x1B[1mUML Diagram Generator for Serverpod YAML models\x1B[0m \n');
+
   try {
+    stdout.writeln(
+        '\n\x1B[1mUML Diagram Generator for Serverpod YAML models\x1B[0m \n');
+
     final results = parser.parse(args);
 
     if (results['help']) {
@@ -23,25 +25,29 @@ void main(List<String> args) async {
       return;
     }
 
-    // Default configuration
-    UmlConfig config = UmlConfig();
+    UmlConfig config;
 
     // Load configuration from file if provided
     final configPath = results['config'];
     if (configPath != null) {
       final configFile = File(configPath);
       if (await configFile.exists()) {
-        final configYaml = loadYaml(await configFile.readAsString());
-        if (configYaml is Map) {
-          config = UmlConfig.fromMap(Map<String, dynamic>.from(configYaml));
+        try {
+          stdout.writeln('📄 Loading configuration from $configPath');
+          config = await UmlConfigParser.getYamlConfigFromFile(configFile);
           stdout.writeln('📄 Configuration loaded from $configPath');
-        } else {
+        } catch (e) {
           stdout.writeln(
-              '⚠️ Warning: Invalid configuration format in $configPath');
+              '⚠️ Warning: Error parsing configuration file: $e - using default values...');
+          config = UmlConfig();
         }
       } else {
-        stdout.writeln('⚠️ Warning: Configuration file not found: $configPath');
+        stdout.writeln(
+            '⚠️ Warning: Configuration file not found at: $configPath - using default values...');
+        config = UmlConfig();
       }
+    } else {
+      config = UmlConfig();
     }
     if (results['dir'] != null) {
       config = config.copyWith(modelsDirPath: results['dir']);
@@ -56,9 +62,10 @@ void main(List<String> args) async {
 
     stdout
         .writeln('✅ Done! UML diagram created at ${config.umlOutputFile} 🗺️');
-  } catch (e) {
+  } catch (e, stackTrace) {
     stdout.writeln('❌ Error: $e');
     printUsage(parser);
+    stdout.write(stackTrace);
     exit(1);
   }
 }

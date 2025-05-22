@@ -1,0 +1,15 @@
+class: Tool
+table: tool
+fields:
+  id: int, primary
+  name: String
+  description: String?
+  serialNumber: String?
+  purchaseDate: DateTime?
+  warrantyEnd: DateTime?
+  toolPower: ToolPower?, relation(name=tool_power)
+  toolkit: Toolkit, relation(name=toolkit_tools, parent=true, onDelete=Cascade)
+  targets: List<ToolTarget>?, relation(name=tool_targets, onDelete=Cascade)
+  qualifiedOperators: List<ToolQualification>?, relation(name=tool_qualified_operators)
+  lastServiceDate: DateTime?
+  nextServiceDue: DateTime?

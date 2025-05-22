@@ -1,0 +1,11 @@
+class: ToolTarget
+table: tool_target
+fields:
+  id: int, primary
+  targetName: String
+  tool: Tool, relation(name=tool_targets, parent=true, onDelete=Cascade)
+  description: String?
+  materials: String?
+  safetyInstructions: String?
+  ## path to image
+  targetImage: String?  

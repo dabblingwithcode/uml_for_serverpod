@@ -1,0 +1,17 @@
+class: Client
+table: client
+fields:
+  id: int, primary
+  name: String
+  contactPerson: String?
+  email: String?
+  phone: String?
+  active: bool
+  createdAt: DateTime
+  locations: List<ServiceLocation>?, relation(name=client_locations, onDelete=Cascade)
+  contracts: List<ServiceContract>?, relation(name=client_contracts, onDelete=Cascade)
+  appointments: List<ServiceAppointment>?, relation(name=client_appointments)
+  documents: List<Document>?, relation
+indexes:
+  client_name_idx:
+    fields: name

@@ -8,7 +8,7 @@ class SpyYamlParser {
   SpyYamlParser({required this.config});
 
   Future<String> collectYamlContent() async {
-    final modelsDir = Directory(config.modelsDirPath!);
+    final modelsDir = Directory(config.modelsDirPath);
     final yamlFiles = <File>[];
     await for (var serverpodObject
         in modelsDir.list(recursive: true, followLinks: false)) {
@@ -193,5 +193,22 @@ class SpyYamlParser {
     objectsMap[currentModel.name!] = currentModel;
     stdout.writeln('⚙️  Parsed ${objectsMap.length} objects.');
     return (serverpodObjectsMap: objectsMap);
+  }
+
+  static String renderUmlObjectFieldRelationLine(
+      {required String key, required String value, required UmlConfig config}) {
+    final type = value.split(',')[0];
+    final relationType = value
+        .split(',')[1]
+        .replaceFirst('relation',
+            '<b><color:${config.relationHexColor}>relation</color></b>')
+        .replaceFirst('name', '<b><color:#f44336>name</color></b>')
+        .replaceFirst('optional', '<b><color:#f44336>optional</color></b>')
+        .replaceFirst('onDelete', '<b><color:#f44336>onDelete</color></b>')
+        .replaceAll('(', '<color:${config.classNameHexColor}>(</color>')
+        .replaceAll(')', '<color:${config.classNameHexColor}>)</color>')
+        .replaceAll('=', '<color:${config.classNameHexColor}>=</color>');
+
+    return ' ➡️ <i>$key</i> : <b><color:${config.classNameHexColor}>$type</color></b>, $relationType';
   }
 }

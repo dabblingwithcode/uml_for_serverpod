@@ -1,0 +1,4 @@
+exception: DataException
+fields:
+  message: String
+  errorType: ErrorType

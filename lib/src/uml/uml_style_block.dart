@@ -5,8 +5,8 @@ class UmlStyleBlock {
   static String generateUmlStyleBlock(UmlConfig config) {
     return '''
 left to right direction
-skinparam nodesep 10
-skinparam ranksep 100
+${config.skinparamNodesep != null ? 'skinparam nodesep ${config.skinparamNodesep}' : ''}
+${config.skinparamRanksep != null ? 'skinparam ranksep ${config.skinparamRanksep}' : ''}
 skinparam attributeFontSize 14
 skinparam class {
   BackgroundColor ${config.classBackgroundHexColor}
@@ -26,7 +26,7 @@ classDiagram {
     LineColor ${config.namespaceBorderHexColor}
     LineThickness 3
     FontSize 12
-    BackgroundColor ${config.namespaceBackgroundHexColor}
+    BackgroundColor ${config.rootNamespaceBackgroundHexColor}
     title {
       Padding 10 10 10 10
       FontSize 36

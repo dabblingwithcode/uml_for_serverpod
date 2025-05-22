@@ -1,0 +1,323 @@
+@startuml uml_for_serverpod
+left to right direction
+skinparam nodesep 30
+skinparam ranksep 100
+skinparam attributeFontSize 14
+skinparam class {
+  BackgroundColor #f1f8df
+  BorderColor #333333
+}
+<style>
+document {
+  BackgroundColor #fff
+  Margin 100 100 100 100
+}
+classDiagram {
+  RoundCorner 25
+  FontSize 13
+  FontStyle Regular
+  package {
+    Padding 20 20 20 20
+    LineColor #333333
+    LineThickness 3
+    FontSize 12
+    BackgroundColor #fff2cc
+    title {
+      Padding 10 10 10 10
+      FontSize 36
+      FontStyle bold
+    }
+  }    
+  class {
+    Padding 10 10 10 10
+    FontSize 12
+        header {
+          FontSize 36
+          FontStyle bold
+        } 
+  }
+}
+
+</style>
+ 
+
+class Client <<table: <b>client</b>>> #e2f0fb##[bold] {
+<size:14>📁</size> <b><size:12> /clients/client.spy.yaml</size></b>
+--
+  <i>id</i>: <b><color:#ff962f>int, primary</color></b>
+  <i>name</i>: <b><color:#ff962f>String</color></b>
+  <i>contactPerson</i>: <b><color:#ff962f>String?</color></b>
+  <i>email</i>: <b><color:#ff962f>String?</color></b>
+  <i>phone</i>: <b><color:#ff962f>String?</color></b>
+  <i>active</i>: <b><color:#ff962f>bool</color></b>
+  <i>createdAt</i>: <b><color:#ff962f>DateTime</color></b>
+ ➡️ <i>locations</i> : <b><color:#ff962f>List<ServiceLocation>?</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>client_locations
+ ➡️ <i>contracts</i> : <b><color:#ff962f>List<ServiceContract>?</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>client_contracts
+ ➡️ <i>appointments</i> : <b><color:#ff962f>List<ServiceAppointment>?</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>client_appointments<color:#ff962f>)</color>
+ ➡️ <i>documents</i> : <b><color:#ff962f>List<Document>?</color></b>,  <b><color:#0164aa>relation</color></b>
+<b><color:#0164aa>indexes:</color></b>
+<b><color:#0164aa>client_name_idx:</color></b>
+
+}
+
+class ServiceContract <<table: <b>service_contract</b>>> #e2f0fb##[bold] {
+<size:14>📁</size> <b><size:12> /clients/service_contract.spy.yaml</size></b>
+--
+  <i>id</i>: <b><color:#ff962f>int, primary</color></b>
+  <i>contractNumber</i>: <b><color:#ff962f>String</color></b>
+ ➡️ <i>client</i> : <b><color:#ff962f>Client</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>client_contracts
+  <i>startDate</i>: <b><color:#ff962f>DateTime</color></b>
+  <i>endDate</i>: <b><color:#ff962f>DateTime</color></b>
+  <i>terms</i>: <b><color:#ff962f>String?</color></b>
+  <i>autoRenew</i>: <b><color:#ff962f>bool</color></b>
+  <i>nextRenewalDate</i>: <b><color:#ff962f>DateTime?</color></b>
+  <i>contractValue</i>: <b><color:#ff962f>double?</color></b>
+ ➡️ <i>documents</i> : <b><color:#ff962f>List<Document>?</color></b>,  <b><color:#0164aa>relation</color></b>
+<b><color:#0164aa>indexes:</color></b>
+<b><color:#0164aa>contract_number_idx:</color></b>
+<b><color:#0164aa>unique</color></b>: <b><color:#ff962f>true</color></b>
+
+}
+
+class ServiceLocation <<table: <b>service_location</b>>> #e2f0fb##[bold] {
+<size:14>📁</size> <b><size:12> /clients/service_location.spy.yaml</size></b>
+--
+  <i>id</i>: <b><color:#ff962f>int, primary</color></b>
+  <i>name</i>: <b><color:#ff962f>String</color></b>
+  <i>address</i>: <b><color:#ff962f>String</color></b>
+  <i>city</i>: <b><color:#ff962f>String</color></b>
+  <i>postalCode</i>: <b><color:#ff962f>String</color></b>
+ ➡️ <i>client</i> : <b><color:#ff962f>Client</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>client_locations
+ ➡️ <i>appointments</i> : <b><color:#ff962f>List<ServiceAppointment>?</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>location_appointments<color:#ff962f>)</color>
+  <i>accessInstructions</i>: <b><color:#ff962f>String?</color></b>
+  <i>primaryContact</i>: <b><color:#ff962f>String?</color></b>
+  <i>contactPhone</i>: <b><color:#ff962f>String?</color></b>
+  <i>active</i>: <b><color:#ff962f>bool</color></b>
+<b><color:#0164aa>indexes:</color></b>
+<b><color:#0164aa>location_address_idx:</color></b>
+<b><color:#0164aa>unique</color></b>: <b><color:#ff962f>true</color></b>
+
+}
+
+class ServiceAppointment <<table: <b>service_appointment</b>>> #e2f0fb##[bold] {
+<size:14>📁</size> <b><size:12> /schedule/service_appointment.spy.yaml</size></b>
+--
+  <i>id</i>: <b><color:#ff962f>int, primary</color></b>
+  <i>appointmentCode</i>: <b><color:#ff962f>String?</color></b>
+  <i>scheduledStart</i>: <b><color:#ff962f>DateTime</color></b>
+  <i>scheduledEnd</i>: <b><color:#ff962f>DateTime</color></b>
+  <i>actualStart</i>: <b><color:#ff962f>DateTime?</color></b>
+  <i>actualEnd</i>: <b><color:#ff962f>DateTime?</color></b>
+  <i>status</i>: <b><color:#ff962f>AppointmentStatus</color></b>
+ ➡️ <i>client</i> : <b><color:#ff962f>Client</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>client_appointments<color:#ff962f>)</color>
+ ➡️ <i>location</i> : <b><color:#ff962f>ServiceLocation</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>location_appointments<color:#ff962f>)</color>
+ ➡️ <i>assignedTeam</i> : <b><color:#ff962f>Team?</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>team_appointments<color:#ff962f>)</color>
+ ➡️ <i>assignedOperators</i> : <b><color:#ff962f>List<Operator>?</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>operator_appointments<color:#ff962f>)</color>
+ ➡️ <i>requiredToolkit</i> : <b><color:#ff962f>Toolkit?</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>toolkit_service_appointments<color:#ff962f>)</color>
+  <i>notes</i>: <b><color:#ff962f>String?</color></b>
+  <i>createdBy</i>: <b><color:#ff962f>String</color></b>
+  <i>createdAt</i>: <b><color:#ff962f>DateTime</color></b>
+  <i>modifiedBy</i>: <b><color:#ff962f>String?</color></b>
+  <i>modifiedAt</i>: <b><color:#ff962f>DateTime?</color></b>
+ ➡️ <i>documents</i> : <b><color:#ff962f>List<Document>?</color></b>,  <b><color:#0164aa>relation</color></b>
+<b><color:#0164aa>indexes:</color></b>
+<b><color:#0164aa>appointment_schedule_idx:</color></b>
+<b><color:#0164aa>appointment_code_idx:</color></b>
+  <i>exceptions</i>: <b><color:#ff962f></color></b>
+  <i>appointmentOverlap</i>: <b><color:#ff962f>2001</color></b>
+  <i>noQualifiedOperator</i>: <b><color:#ff962f>2002</color></b>
+
+}
+
+exception DataException #ffe6e6##[bold]  {
+<size:14>📁</size> <b><size:12> /shared/data_exception.spy.yaml</size></b>
+--
+  <i>message</i>: <b><color:#ff962f>String</color></b>
+  <i>errorType</i>: <b><color:#ff962f>ErrorType</color></b>
+
+}
+
+class Document <<table: <b>document</b>>> #e2f0fb##[bold] {
+<size:14>📁</size> <b><size:12> /shared/document.spy.yaml</size></b>
+--
+  <i>id</i>: <b><color:#ff962f>int, primary</color></b>
+  <i>documentId</i>: <b><color:#ff962f>String</color></b>
+  <i>documentPath</i>: <b><color:#ff962f>String</color></b>
+  <i>documentType</i>: <b><color:#ff962f>String</color></b>
+  <i>description</i>: <b><color:#ff962f>String?</color></b>
+  <i>uploadedBy</i>: <b><color:#ff962f>String</color></b>
+  <i>uploadedAt</i>: <b><color:#ff962f>DateTime</color></b>
+<b><color:#0164aa>indexes:</color></b>
+<b><color:#0164aa>document_id_idx:</color></b>
+<b><color:#0164aa>unique</color></b>: <b><color:#ff962f>true</color></b>
+
+}
+
+class Operator <<table: <b>operator</b>>> #e2f0fb##[bold] {
+<size:14>📁</size> <b><size:12> /team/operators/operator.spy.yaml</size></b>
+--
+  <i>id</i>: <b><color:#ff962f>int, primary</color></b>
+  <i>firstName</i>: <b><color:#ff962f>String</color></b>
+  <i>lastName</i>: <b><color:#ff962f>String</color></b>
+  <i>employeeId</i>: <b><color:#ff962f>String</color></b>
+  <i>contactPhone</i>: <b><color:#ff962f>String?</color></b>
+  <i>emergencyContact</i>: <b><color:#ff962f>String?</color></b>
+  <i>hireDate</i>: <b><color:#ff962f>DateTime</color></b>
+  <i>active</i>: <b><color:#ff962f>bool</color></b>
+ ➡️ <i>toolQualifications</i> : <b><color:#ff962f>List<ToolQualification>?</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>operator_tool_qualifications
+ ➡️ <i>teams</i> : <b><color:#ff962f>List<Team>?</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>team_operators<color:#ff962f>)</color>
+ ➡️ <i>toolkits</i> : <b><color:#ff962f>List<Toolkit>?</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>toolkit_operators<color:#ff962f>)</color>
+ ➡️ <i>appointments</i> : <b><color:#ff962f>List<ServiceAppointment>?</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>operator_appointments<color:#ff962f>)</color>
+ ➡️ <i>documents</i> : <b><color:#ff962f>List<Document>?</color></b>,  <b><color:#0164aa>relation</color></b>
+<b><color:#0164aa>indexes:</color></b>
+<b><color:#0164aa>operator_name_idx:</color></b>
+<b><color:#0164aa>employee_id_idx:</color></b>
+<b><color:#0164aa>unique</color></b>: <b><color:#ff962f>true</color></b>
+
+}
+
+class ToolQualification <<table: <b>tool_qualification</b>>> #e2f0fb##[bold] {
+<size:14>📁</size> <b><size:12> /team/operators/tool_qualification.spy.yaml</size></b>
+--
+  <i>id</i>: <b><color:#ff962f>int, primary</color></b>
+ ➡️ <i>operator</i> : <b><color:#ff962f>Operator</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>operator_tool_qualifications
+ ➡️ <i>tool</i> : <b><color:#ff962f>Tool</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>tool_qualified_operators<color:#ff962f>)</color>
+  <i>qualificationDate</i>: <b><color:#ff962f>DateTime</color></b>
+  <i>expiryDate</i>: <b><color:#ff962f>DateTime?</color></b>
+  <i>certifiedBy</i>: <b><color:#ff962f>String?</color></b>
+  <i>certificationNumber</i>: <b><color:#ff962f>String?</color></b>
+<color:#93c47d>## 1-5 rating</color>
+  <i>skill</i>: <b><color:#ff962f>int</color></b>
+  <i>notes</i>: <b><color:#ff962f>String?</color></b>
+ ➡️ <i>documents</i> : <b><color:#ff962f>List<Document>?</color></b>,  <b><color:#0164aa>relation</color></b>
+<b><color:#0164aa>indexes:</color></b>
+<b><color:#0164aa>qualification_unique_idx:</color></b>
+<b><color:#0164aa>unique</color></b>: <b><color:#ff962f>true</color></b>
+
+}
+
+class Team <<table: <b>team</b>>> #e2f0fb##[bold] {
+<size:14>📁</size> <b><size:12> /team/team.spy.yaml</size></b>
+--
+  <i>id</i>: <b><color:#ff962f>int, primary</color></b>
+  <i>teamData</i>: <b><color:#ff962f>TeamData</color></b>
+ ➡️ <i>leadOperator</i> : <b><color:#ff962f>Operator?</color></b>,  <b><color:#0164aa>relation</color></b>
+ ➡️ <i>operators</i> : <b><color:#ff962f>List<Operator>?</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>team_operators<color:#ff962f>)</color>
+ ➡️ <i>serviceAppointments</i> : <b><color:#ff962f>List<ServiceAppointment>?</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>team_appointments<color:#ff962f>)</color>
+<color:#93c47d>## hex color for UI</color>
+  <i>color</i>: <b><color:#ff962f>String?</color></b>
+  <i>active</i>: <b><color:#ff962f>bool</color></b>
+<b><color:#0164aa>indexes:</color></b>
+<b><color:#0164aa>team_name_idx:</color></b>
+<b><color:#0164aa>unique</color></b>: <b><color:#ff962f>true</color></b>
+
+}
+
+class TeamData ##[bold]  {
+<size:14>📁</size> <b><size:12> /team/team_data.spy.yaml</size></b>
+--
+  <i>name</i>: <b><color:#ff962f>String</color></b>
+  <i>description</i>: <b><color:#ff962f>String?</color></b>
+
+}
+
+class Tool <<table: <b>tool</b>>> #e2f0fb##[bold] {
+<size:14>📁</size> <b><size:12> /tools/tool.spy.yaml</size></b>
+--
+  <i>id</i>: <b><color:#ff962f>int, primary</color></b>
+  <i>name</i>: <b><color:#ff962f>String</color></b>
+  <i>description</i>: <b><color:#ff962f>String?</color></b>
+  <i>serialNumber</i>: <b><color:#ff962f>String?</color></b>
+  <i>purchaseDate</i>: <b><color:#ff962f>DateTime?</color></b>
+  <i>warrantyEnd</i>: <b><color:#ff962f>DateTime?</color></b>
+ ➡️ <i>toolPower</i> : <b><color:#ff962f>ToolPower?</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>tool_power<color:#ff962f>)</color>
+ ➡️ <i>toolkit</i> : <b><color:#ff962f>Toolkit</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>toolkit_tools
+ ➡️ <i>targets</i> : <b><color:#ff962f>List<ToolTarget>?</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>tool_targets
+ ➡️ <i>qualifiedOperators</i> : <b><color:#ff962f>List<ToolQualification>?</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>tool_qualified_operators<color:#ff962f>)</color>
+  <i>lastServiceDate</i>: <b><color:#ff962f>DateTime?</color></b>
+  <i>nextServiceDue</i>: <b><color:#ff962f>DateTime?</color></b>
+
+}
+
+class Toolkit <<table: <b>toolkit</b>>> #e2f0fb##[bold] {
+<size:14>📁</size> <b><size:12> /tools/toolkit.spy.yaml</size></b>
+--
+  <i>id</i>: <b><color:#ff962f>int, primary</color></b>
+  <i>name</i>: <b><color:#ff962f>String</color></b>
+  <i>description</i>: <b><color:#ff962f>String?</color></b>
+<color:#93c47d>## days between required service</color>
+  <i>serviceInterval</i>: <b><color:#ff962f>int?</color></b>
+  <i>serialNumber</i>: <b><color:#ff962f>String?</color></b>
+  <i>active</i>: <b><color:#ff962f>bool</color></b>
+  <i>createdBy</i>: <b><color:#ff962f>String</color></b>
+  <i>createdAt</i>: <b><color:#ff962f>DateTime</color></b>
+  <i>modifiedBy</i>: <b><color:#ff962f>String?</color></b>
+  <i>modifiedAt</i>: <b><color:#ff962f>DateTime?</color></b>
+ ➡️ <i>tools</i> : <b><color:#ff962f>List<Tool>?</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>toolkit_tools<color:#ff962f>)</color>
+ ➡️ <i>operators</i> : <b><color:#ff962f>List<Operator>?</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>toolkit_operators<color:#ff962f>)</color>
+ ➡️ <i>serviceAppointments</i> : <b><color:#ff962f>List<ServiceAppointment>?</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>toolkit_service_appointments<color:#ff962f>)</color>
+ ➡️ <i>documents</i> : <b><color:#ff962f>List<Document>?</color></b>,  <b><color:#0164aa>relation</color></b>
+<b><color:#0164aa>indexes:</color></b>
+<b><color:#0164aa>toolkit_name_idx:</color></b>
+
+}
+
+class ToolPower <<table: <b>tool_power</b>>> #e2f0fb##[bold] {
+<size:14>📁</size> <b><size:12> /tools/tool_power/tool_power.spy.yaml</size></b>
+--
+  <i>id</i>: <b><color:#ff962f>int, primary</color></b>
+  <i>powerType</i>: <b><color:#ff962f>ToolPowerType</color></b>
+<color:#93c47d>## watts, horsepower, etc</color>
+  <i>powerRating</i>: <b><color:#ff962f>double?</color></b>
+  <i>powerUnit</i>: <b><color:#ff962f>String?</color></b>
+ ➡️ <i>tools</i> : <b><color:#ff962f>List<Tool>?</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>tool_power<color:#ff962f>)</color>
+
+}
+
+enum ToolPowerType #ece4ff ##[bold] {
+<size:14>📁</size> <b><size:12> /tools/tool_power/tool_power_type.spy.yaml</size></b>
+--
+  serialized: byName
+  values: manual, electric, pneumatic, hydraulic, battery, fuel
+
+}
+
+class ToolTarget <<table: <b>tool_target</b>>> #e2f0fb##[bold] {
+<size:14>📁</size> <b><size:12> /tools/tool_target.spy.yaml</size></b>
+--
+  <i>id</i>: <b><color:#ff962f>int, primary</color></b>
+  <i>targetName</i>: <b><color:#ff962f>String</color></b>
+ ➡️ <i>tool</i> : <b><color:#ff962f>Tool</color></b>,  <b><color:#0164aa>relation</color></b><color:#ff962f>(</color><b><color:#f44336>name</color></b><color:#ff962f>=</color>tool_targets
+  <i>description</i>: <b><color:#ff962f>String?</color></b>
+  <i>materials</i>: <b><color:#ff962f>String?</color></b>
+  <i>safetyInstructions</i>: <b><color:#ff962f>String?</color></b>
+<color:#93c47d>## path to image</color>
+  <i>targetImage</i>: <b><color:#ff962f>String?</color></b>
+
+}
+
+ Client::locations "<b><size:20><color:#9b59b6><back:white>1</back></color></size></b>" <-[#FF4500,thickness=4]- "<b><size:20><color:#27ae60><back:white>N</back></color></size></b>" ServiceLocation 
+ Client::contracts "<b><size:20><color:#9b59b6><back:white>1</back></color></size></b>" <-[#008000,thickness=4]- "<b><size:20><color:#27ae60><back:white>N</back></color></size></b>" ServiceContract 
+ Client::appointments "<b><size:20><color:#9b59b6><back:white>1</back></color></size></b>" <-[#4169E1,thickness=4]- "<b><size:20><color:#27ae60><back:white>N</back></color></size></b>" ServiceAppointment 
+ Client::documents "<b><size:20><color:#9b59b6><back:white>1</back></color></size></b>" <-[#FFD700,thickness=4]- "<b><size:20><color:#27ae60><back:white>N</back></color></size></b>" Document 
+ ServiceContract::documents "<b><size:20><color:#9b59b6><back:white>1</back></color></size></b>" <-[#8A2BE2,thickness=4]- "<b><size:20><color:#27ae60><back:white>N</back></color></size></b>" Document 
+ ServiceLocation::appointments "<b><size:20><color:#9b59b6><back:white>1</back></color></size></b>" <-[#4682B4,thickness=4]- "<b><size:20><color:#27ae60><back:white>N</back></color></size></b>" ServiceAppointment 
+ ServiceAppointment::assignedTeam "<b><size:20><color:#9b59b6><back:white>1</back></color></size></b>" -[#FF4500,thickness=4]-> "<b><size:20><color:#27ae60><back:white>N</back></color></size></b>" Team 
+ ServiceAppointment::assignedOperators "<b><size:20><color:#9b59b6><back:white>1</back></color></size></b>" <-[#008000,thickness=4]- "<b><size:20><color:#27ae60><back:white>N</back></color></size></b>" Operator 
+ ServiceAppointment::requiredToolkit "<b><size:20><color:#9b59b6><back:white>1</back></color></size></b>" -[#4169E1,thickness=4]-> "<b><size:20><color:#27ae60><back:white>N</back></color></size></b>" Toolkit 
+ ServiceAppointment::documents "<b><size:20><color:#9b59b6><back:white>1</back></color></size></b>" <-[#FFD700,thickness=4]- "<b><size:20><color:#27ae60><back:white>N</back></color></size></b>" Document 
+ Operator::toolQualifications "<b><size:20><color:#9b59b6><back:white>1</back></color></size></b>" <-[#8A2BE2,thickness=4]- "<b><size:20><color:#27ae60><back:white>N</back></color></size></b>" ToolQualification 
+ Operator::teams "<b><size:20><color:#9b59b6><back:white>1</back></color></size></b>" <-[#4682B4,thickness=4]- "<b><size:20><color:#27ae60><back:white>N</back></color></size></b>" Team 
+ Operator::toolkits "<b><size:20><color:#9b59b6><back:white>1</back></color></size></b>" <-[#FF4500,thickness=4]- "<b><size:20><color:#27ae60><back:white>N</back></color></size></b>" Toolkit 
+ Operator::documents "<b><size:20><color:#9b59b6><back:white>1</back></color></size></b>" <-[#008000,thickness=4]- "<b><size:20><color:#27ae60><back:white>N</back></color></size></b>" Document 
+ ToolQualification::tool "<b><size:20><color:#9b59b6><back:white>1</back></color></size></b>" -[#4169E1,thickness=4]-> "<b><size:20><color:#27ae60><back:white>N</back></color></size></b>" Tool 
+ ToolQualification::documents "<b><size:20><color:#9b59b6><back:white>1</back></color></size></b>" <-[#FFD700,thickness=4]- "<b><size:20><color:#27ae60><back:white>N</back></color></size></b>" Document 
+ Tool::toolPower "<b><size:20><color:#9b59b6><back:white>1</back></color></size></b>" -[#8A2BE2,thickness=4]-> "<b><size:20><color:#27ae60><back:white>N</back></color></size></b>" ToolPower 
+ Tool::toolkit "<b><size:20><color:#9b59b6><back:white>1</back></color></size></b>" -[#4682B4,thickness=4]-> "<b><size:20><color:#27ae60><back:white>N</back></color></size></b>" Toolkit 
+ Tool::targets "<b><size:20><color:#9b59b6><back:white>1</back></color></size></b>" <-[#FF4500,thickness=4]- "<b><size:20><color:#27ae60><back:white>N</back></color></size></b>" ToolTarget 
+ Toolkit::documents "<b><size:20><color:#9b59b6><back:white>1</back></color></size></b>" <-[#008000,thickness=4]- "<b><size:20><color:#27ae60><back:white>N</back></color></size></b>" Document 
+
+Team - TeamData
+ToolPower - Tool
+ToolPower - ToolPowerType
+@enduml

@@ -1,3 +1,11 @@
+## 0.0.5
+
+* added example models
+* added makefile
+* additional namespace styling options
+* refactor yaml config file structure
+* refactor uml namespace generation
+
 ## 0.0.4+1
 
 * Fix namespace orphan dot.

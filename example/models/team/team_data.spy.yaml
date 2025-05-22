@@ -1,0 +1,4 @@
+class: TeamData
+fields:
+  name: String
+  description: String?

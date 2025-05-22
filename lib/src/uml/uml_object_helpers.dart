@@ -1,7 +1,8 @@
-import 'package:uml_for_serverpod/src/colors.dart';
+import 'package:uml_for_serverpod/src/uml/colors.dart';
 import 'package:uml_for_serverpod/src/models.dart';
+import 'package:uml_for_serverpod/src/yaml/spy_yaml_parser.dart';
 
-class UmlHelpers {
+class UmlObjectHelpers {
   static String getObjectNameWithNameSpace(UmlObject object, UmlConfig config) {
     final pathParts = object.filepath?.split('/') ?? [];
     final firstNameSpace = pathParts.isNotEmpty
@@ -25,26 +26,33 @@ class UmlHelpers {
     return result;
   }
 
-  static String getObjectDeclaration(UmlObject object, UmlConfig config) {
-    final objectName = config.useNameSpace
-        ? getObjectNameWithNameSpace(object, config)
-        : object.name;
+  static String renderUmlObjectDeclaration(UmlObject object, UmlConfig config) {
+    // final objectName = config.useNameSpace
+    //     ? getObjectNameWithNameSpace(object, config)
+    //     : object.name;
+    final objectName = object.name;
     final objectType = object.objectType;
     if (objectType == null) {
       throw Exception('Object type is null');
     }
-    // the database class is a special case
-    if (objectType == ObjectType.databaseClassType) {
-      return '${objectType.value} $objectName <<table: <b>${object.tableName}</b>>> ##[bold] {';
-    } else {
-      return '${objectType.value} $objectName ##[bold] {';
+    switch (objectType) {
+      case ObjectType.classType:
+        return '${objectType.value} $objectName ##[bold]  {';
+      case ObjectType.databaseClassType:
+        return '${objectType.value} $objectName <<table: <b>${object.tableName}</b>>> #e2f0fb##[bold] {';
+
+      case ObjectType.exceptionType:
+        return '${objectType.value} $objectName #ffe6e6##[bold]  {';
+      case ObjectType.enumType:
+        return '${objectType.value} $objectName #ece4ff ##[bold] {';
     }
   }
 
-  static String? formatFieldLine(String key, String value, UmlConfig config) {
+  static String? renderUmlObjectFieldLine(
+      String key, String value, UmlConfig config) {
     if (value.contains('relation')) {
-      return ' ➡️ <i>$key</i> : <b><color:${config.classNameHexColor}>${value.split(',')[0]}</color></b> '
-          '${value.split(',')[1].replaceFirst('relation', '<b><color:${config.relationHexColor}>relation</color></b>')} ';
+      return SpyYamlParser.renderUmlObjectFieldRelationLine(
+          key: key, value: value, config: config);
     } else if (key.contains('##')) {
       return config.printComments
           ? '<color:${config.commentHexColor}>$key</color>'
@@ -60,7 +68,7 @@ class UmlHelpers {
     }
   }
 
-  static List<String> getUmlObjectRelationLines(
+  static List<String> renderUmlObjectRelationLines(
       UmlConfig config, List<ObjectRelation> relations) {
     final relationLines = <String>[];
     int? lastArrowIndex;

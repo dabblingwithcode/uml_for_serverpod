@@ -1,0 +1,22 @@
+class: Operator
+table: operator
+fields:
+  id: int, primary
+  firstName: String
+  lastName: String
+  employeeId: String
+  contactPhone: String?
+  emergencyContact: String?
+  hireDate: DateTime
+  active: bool
+  toolQualifications: List<ToolQualification>?, relation(name=operator_tool_qualifications, onDelete=Cascade)
+  teams: List<Team>?, relation(name=team_operators)
+  toolkits: List<Toolkit>?, relation(name=toolkit_operators)
+  appointments: List<ServiceAppointment>?, relation(name=operator_appointments)
+  documents: List<Document>?, relation
+indexes:
+  operator_name_idx:
+    fields: [lastName, firstName]
+  employee_id_idx:
+    fields: employeeId
+    unique: true

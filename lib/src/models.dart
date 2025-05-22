@@ -18,6 +18,18 @@ enum RelationType {
   many,
 }
 
+class UmlNamespace {
+  final String name;
+  final String? parentNameSpace;
+  List<UmlObject> children;
+
+  UmlNamespace({
+    required this.name,
+    required this.parentNameSpace,
+    required this.children,
+  });
+}
+
 enum ClassProperty {
   table,
   serverOnly,
@@ -63,22 +75,30 @@ class UmlObject {
   });
 }
 
-// Add this class to models.dart
 class UmlConfig {
   // input/output paths
-  final String? modelsDirPath;
-  final String? umlOutputFile;
+  final String modelsDirPath;
+
+  final String umlOutputFile;
+
+  // layout options
+  final int? skinparamNodesep;
+
+  final int? skinparamRanksep;
 
   // comments / colorful arrows options
   final bool printComments;
+
   final bool colorfullArrows;
 
   // namespace options
   final bool useNameSpace;
+
   final String? ignoreRootFolder;
 
-  // defain one and many strings for the arrows
+  // define one and many strings for the arrows relation labelling
   final String oneString;
+
   final String manyString;
 
   // custom colors
@@ -89,10 +109,14 @@ class UmlConfig {
   final String classNameHexColor;
   final String classBorderHexColor;
   final String classBackgroundHexColor;
-  final String namespaceBackgroundHexColor;
-  final String? namespaceBorderHexColor;
+  final String rootNamespaceBackgroundHexColor;
+  final String namespaceBorderHexColor;
+  final String secondLevelNamespaceBackgroundHexColor;
+  final String thirdLevelNamespaceBackgroundHexColor;
 
   UmlConfig({
+    this.skinparamNodesep,
+    this.skinparamRanksep,
     this.printComments = true,
     this.colorfullArrows = true,
     this.useNameSpace = true,
@@ -105,15 +129,21 @@ class UmlConfig {
     this.oneHexColor = '#9b59b6',
     this.oneString = '1',
     this.relationHexColor = '#0164aa',
+    // class styling
     this.classNameHexColor = '#ff962f',
     this.classBorderHexColor = '#333333',
     this.classBackgroundHexColor = '#EEEEEE',
-    this.namespaceBackgroundHexColor = '#DDDDDD',
+    // namespace styling
     this.namespaceBorderHexColor = '#333333',
+    this.rootNamespaceBackgroundHexColor = '#fff2cc',
+    this.secondLevelNamespaceBackgroundHexColor = '#ffe9a7',
+    this.thirdLevelNamespaceBackgroundHexColor = '#ffdb72',
   });
 
   // Add this method to your UmlConfig class
   UmlConfig copyWith({
+    int? skinparamNodesep,
+    int? skinparamRanksep,
     bool? printComments,
     bool? colorfullArrows,
     bool? useNameSpace,
@@ -129,10 +159,14 @@ class UmlConfig {
     String? classNameHexColor,
     String? classBorderHexColor,
     String? classBackgroundHexColor,
-    String? namespaceBackgroundHexColor,
+    String? rootNamespaceBackgroundHexColor,
+    String? secondLevelNamespaceBackgroundHexColor,
+    String? thirdLevelNamespaceBackgroundHexColor,
     String? namespaceBorderHexColor,
   }) {
     return UmlConfig(
+      skinparamNodesep: skinparamNodesep ?? this.skinparamNodesep,
+      skinparamRanksep: skinparamRanksep ?? this.skinparamRanksep,
       printComments: printComments ?? this.printComments,
       colorfullArrows: colorfullArrows ?? this.colorfullArrows,
       useNameSpace: useNameSpace ?? this.useNameSpace,
@@ -149,8 +183,14 @@ class UmlConfig {
       classBorderHexColor: classBorderHexColor ?? this.classBorderHexColor,
       classBackgroundHexColor:
           classBackgroundHexColor ?? this.classBackgroundHexColor,
-      namespaceBackgroundHexColor:
-          namespaceBackgroundHexColor ?? this.namespaceBackgroundHexColor,
+      rootNamespaceBackgroundHexColor: rootNamespaceBackgroundHexColor ??
+          this.rootNamespaceBackgroundHexColor,
+      secondLevelNamespaceBackgroundHexColor:
+          secondLevelNamespaceBackgroundHexColor ??
+              this.secondLevelNamespaceBackgroundHexColor,
+      thirdLevelNamespaceBackgroundHexColor:
+          thirdLevelNamespaceBackgroundHexColor ??
+              this.thirdLevelNamespaceBackgroundHexColor,
       namespaceBorderHexColor:
           namespaceBorderHexColor ?? this.namespaceBorderHexColor,
     );
@@ -158,6 +198,8 @@ class UmlConfig {
 
   factory UmlConfig.fromMap(Map<String, dynamic> map) {
     return UmlConfig(
+      skinparamNodesep: map['skinparamNodesep'],
+      skinparamRanksep: map['skinparamRanksep'],
       printComments: map['printComments'] ?? true,
       colorfullArrows: map['colorfullArrows'] ?? true,
       useNameSpace: map['useNameSpace'] ?? true,
@@ -173,8 +215,12 @@ class UmlConfig {
       classNameHexColor: map['classNameHexColor'] ?? '#ff962f',
       classBorderHexColor: map['classBorderHexColor'] ?? '#333333',
       classBackgroundHexColor: map['classBackgroundHexColor'] ?? '#EEEEEE',
-      namespaceBackgroundHexColor:
-          map['namespaceBackgroundHexColor'] ?? '#DDDDDD',
+      rootNamespaceBackgroundHexColor:
+          map['rootNamespaceBackgroundHexColor'] ?? '#DDDDDD',
+      secondLevelNamespaceBackgroundHexColor:
+          map['secondLevelNamespaceBackgroundHexColor'] ?? '#FFE9A7',
+      thirdLevelNamespaceBackgroundHexColor:
+          map['thirdLevelNamespaceBackgroundHexColor'] ?? '#FFDB72',
       namespaceBorderHexColor: map['namespaceBorderHexColor'] ?? '#333333',
     );
   }

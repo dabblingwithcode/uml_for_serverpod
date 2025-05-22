@@ -1,0 +1,29 @@
+class: ServiceAppointment
+table: service_appointment
+fields:
+  id: int, primary
+  appointmentCode: String?
+  scheduledStart: DateTime
+  scheduledEnd: DateTime
+  actualStart: DateTime?
+  actualEnd: DateTime?
+  status: AppointmentStatus
+  client: Client, relation(name=client_appointments)
+  location: ServiceLocation, relation(name=location_appointments)
+  assignedTeam: Team?, relation(name=team_appointments)
+  assignedOperators: List<Operator>?, relation(name=operator_appointments)
+  requiredToolkit: Toolkit?, relation(name=toolkit_service_appointments)
+  notes: String?
+  createdBy: String
+  createdAt: DateTime
+  modifiedBy: String?
+  modifiedAt: DateTime?
+  documents: List<Document>?, relation
+indexes:
+  appointment_schedule_idx:
+    fields: [scheduledStart, scheduledEnd]
+  appointment_code_idx:
+    fields: appointmentCode
+exceptions:
+  appointmentOverlap: 2001
+  noQualifiedOperator: 2002

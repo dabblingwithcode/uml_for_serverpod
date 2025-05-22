@@ -1,0 +1,15 @@
+class: Team
+table: team
+fields:
+  id: int, primary
+  teamData: TeamData
+  leadOperator: Operator?, relation
+  operators: List<Operator>?, relation(name=team_operators)
+  serviceAppointments: List<ServiceAppointment>?, relation(name=team_appointments)
+  ## hex color for UI
+  color: String?  
+  active: bool
+indexes:
+  team_name_idx:
+    fields: name
+    unique: true

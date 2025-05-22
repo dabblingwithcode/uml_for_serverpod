@@ -1,0 +1,17 @@
+class: ServiceContract
+table: service_contract
+fields:
+  id: int, primary
+  contractNumber: String
+  client: Client, relation(name=client_contracts, parent=true, onDelete=Cascade)
+  startDate: DateTime
+  endDate: DateTime
+  terms: String?
+  autoRenew: bool
+  nextRenewalDate: DateTime?
+  contractValue: double?
+  documents: List<Document>?, relation
+indexes:
+  contract_number_idx:
+    fields: contractNumber
+    unique: true

@@ -1,0 +1,10 @@
+
+class: ToolPower
+table: tool_power
+fields:
+  id: int, primary
+  powerType: ToolPowerType
+  ## watts, horsepower, etc
+  powerRating: double? 
+  powerUnit: String?
+  tools: List<Tool>?, relation(name=tool_power)

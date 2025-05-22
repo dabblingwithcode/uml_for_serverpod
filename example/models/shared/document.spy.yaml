@@ -1,0 +1,15 @@
+class: Document
+table: document
+fields:
+  id: int, primary
+  documentId: String
+  documentPath: String
+  documentType: String
+  description: String?
+  uploadedBy: String
+  uploadedAt: DateTime
+
+indexes:
+  document_id_idx:
+    fields: documentId
+    unique: true

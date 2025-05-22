@@ -1,0 +1,18 @@
+class: ServiceLocation
+table: service_location
+fields:
+  id: int, primary
+  name: String
+  address: String
+  city: String
+  postalCode: String
+  client: Client, relation(name=client_locations, parent=true, onDelete=Cascade)
+  appointments: List<ServiceAppointment>?, relation(name=location_appointments)
+  accessInstructions: String?
+  primaryContact: String?
+  contactPhone: String?
+  active: bool
+indexes:
+  location_address_idx:
+    fields: [client, address]
+    unique: true

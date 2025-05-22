@@ -1,0 +1,21 @@
+class: Toolkit
+table: toolkit
+fields:
+  id: int, primary
+  name: String
+  description: String?
+  ## days between required service
+  serviceInterval: int?  
+  serialNumber: String?
+  active: bool
+  createdBy: String
+  createdAt: DateTime
+  modifiedBy: String?
+  modifiedAt: DateTime?
+  tools: List<Tool>?, relation(name=toolkit_tools)
+  operators: List<Operator>?, relation(name=toolkit_operators)
+  serviceAppointments: List<ServiceAppointment>?, relation(name=toolkit_service_appointments)
+  documents: List<Document>?, relation
+indexes:
+  toolkit_name_idx:
+    fields: name

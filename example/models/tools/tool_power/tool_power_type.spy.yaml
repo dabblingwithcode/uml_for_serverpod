@@ -1,0 +1,9 @@
+enum: ToolPowerType
+serialized: byName
+values:
+  - manual
+  - electric
+  - pneumatic
+  - hydraulic
+  - battery
+  - fuel

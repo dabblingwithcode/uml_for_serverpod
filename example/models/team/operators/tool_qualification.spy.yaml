@@ -1,0 +1,18 @@
+class: ToolQualification
+table: tool_qualification
+fields:
+  id: int, primary
+  operator: Operator, relation(name=operator_tool_qualifications, parent=true, onDelete=Cascade)
+  tool: Tool, relation(name=tool_qualified_operators)
+  qualificationDate: DateTime
+  expiryDate: DateTime?
+  certifiedBy: String?
+  certificationNumber: String?
+  ## 1-5 rating
+  skill: int 
+  notes: String?
+  documents: List<Document>?, relation
+indexes:
+  qualification_unique_idx:
+    fields: operator, tool
+    unique: true
