@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:uml_for_serverpod/src/uml/colors.dart';
 import 'package:uml_for_serverpod/src/uml/generate_uml_namespaces_with_objects.dart';
+import 'package:uml_for_serverpod/src/uml/implicit_links.dart';
 import 'package:uml_for_serverpod/src/uml/generate_uml_object.dart';
 import 'package:uml_for_serverpod/src/uml/uml_object_helpers.dart';
 import 'package:uml_for_serverpod/src/uml/uml_style_block.dart';
@@ -86,6 +88,7 @@ class UmlGenerator {
     umlBuffer.writeln();
 
     // Add implicit relationships
+    var typeLinkIndex = 0;
     for (var entryA in objectsMap.entries) {
       final modelA = entryA.value;
       if (modelA.fields != null) {
@@ -95,17 +98,16 @@ class UmlGenerator {
           if (modelA.name! == modelB.name!) {
             continue;
           }
-
-          final found = modelA.fields!.entries.any((field) {
-            final fieldValue = field.value;
-            return !fieldValue.contains('relation') &&
-                (fieldValue == modelB.name! ||
-                    fieldValue.contains(modelB.name!) ||
-                    fieldValue.contains('List<${modelB.name!}>'));
+          final link = implicitLinkKind(modelA.fields!, modelB.name!);
+          if (link == null) continue;
+          final style = config.colorfullTypeLinks
+              ? '[${colorPalette[typeLinkIndex++ % colorPalette.length]}]'
+              : '';
+          umlBuffer.writeln(switch (link) {
+            ImplicitLink.inheritance =>
+              '${modelB.name!} <|-$style- ${modelA.name!}',
+            ImplicitLink.fieldType => '${modelA.name!} -$style ${modelB.name!}',
           });
-          if (found) {
-            umlBuffer.writeln('${modelA.name!} - ${modelB.name!}');
-          }
         }
       }
     }

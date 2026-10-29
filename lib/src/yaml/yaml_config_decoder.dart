@@ -29,6 +29,8 @@ class UmlConfigParser {
           // relations style
           colorfullArrows: configYaml['style']?['relations']
               ?['colorfullArrows'],
+          colorfullTypeLinks: configYaml['style']?['relations']
+              ?['colorfullTypeLinks'],
           oneString: configYaml['style']?['relations']?['oneString'],
           oneHexColor: configYaml['style']?['relations']?['oneHexColor'],
           manyString: configYaml['style']?['relations']?['manyString'],

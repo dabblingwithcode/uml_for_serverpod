@@ -86,6 +86,7 @@ layout:
 style:
   relations:
     colorfullArrows: true
+    colorfullTypeLinks: true # optional: colour field-type and inheritance links too
     oneHexColor: '#9b59b6'
     oneString: 'one'
     manyHexColor: '#27ae60'

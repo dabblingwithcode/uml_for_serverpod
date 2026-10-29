@@ -100,6 +100,9 @@ class UmlConfig {
 
   final bool colorfullArrows;
 
+  // colour the implicit field-type and inheritance links as well
+  final bool colorfullTypeLinks;
+
   // namespace options
   final bool useNameSpace;
 
@@ -131,6 +134,7 @@ class UmlConfig {
     this.flatPackages = false,
     this.printComments = true,
     this.colorfullArrows = true,
+    this.colorfullTypeLinks = false,
     this.useNameSpace = true,
     this.modelsDirPath = 'lib',
     this.umlOutputFile = 'serverpod_uml_diagram.puml',
@@ -161,6 +165,7 @@ class UmlConfig {
     bool? flatPackages,
     bool? printComments,
     bool? colorfullArrows,
+    bool? colorfullTypeLinks,
     bool? useNameSpace,
     String? modelsDirPath,
     String? umlOutputFile,
@@ -187,6 +192,7 @@ class UmlConfig {
       flatPackages: flatPackages ?? this.flatPackages,
       printComments: printComments ?? this.printComments,
       colorfullArrows: colorfullArrows ?? this.colorfullArrows,
+      colorfullTypeLinks: colorfullTypeLinks ?? this.colorfullTypeLinks,
       useNameSpace: useNameSpace ?? this.useNameSpace,
       modelsDirPath: modelsDirPath ?? this.modelsDirPath,
       umlOutputFile: umlOutputFile ?? this.umlOutputFile,
@@ -223,6 +229,7 @@ class UmlConfig {
       flatPackages: map['flatPackages'] ?? false,
       printComments: map['printComments'] ?? true,
       colorfullArrows: map['colorfullArrows'] ?? true,
+      colorfullTypeLinks: map['colorfullTypeLinks'] ?? false,
       useNameSpace: map['useNameSpace'] ?? true,
       modelsDirPath: map['modelsDirPath'] ?? 'lib',
       umlOutputFile: map['umlOutputFile'] ?? 'er_diagram.puml',

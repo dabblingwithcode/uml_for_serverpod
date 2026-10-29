@@ -2,6 +2,8 @@
 
 * Optional `style.class.maxWidth`: class cards wrap their text beyond this width (PlantUML `MaximumWidth`).
 * Optional `layout.engine` (`elk` or `smetana`, PlantUML `!pragma layout`): `elk` gives large diagrams a balanced width and height.
+* Optional `style.relations.colorfullTypeLinks`: field-type and inheritance links are coloured too.
+* Field types are matched as whole type names (`JobStatus` no longer links to `Job`); `extends` is drawn as inheritance (`<|--`).
 * Optional `layout.flatPackages` (`set separator none`): dotted package names stay flat instead of nesting.
 
 ## 0.0.5
