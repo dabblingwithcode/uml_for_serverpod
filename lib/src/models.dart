@@ -86,6 +86,12 @@ class UmlConfig {
 
   final int? skinparamRanksep;
 
+  // layout engine: elk or smetana (PlantUML `!pragma layout`); null keeps graphviz
+  final String? layoutEngine;
+
+  // keep dotted package names flat instead of nesting them (`set separator none`)
+  final bool flatPackages;
+
   // class cards wider than this wrap their text (PlantUML MaximumWidth)
   final int? classMaxWidth;
 
@@ -121,6 +127,8 @@ class UmlConfig {
     this.skinparamNodesep,
     this.skinparamRanksep,
     this.classMaxWidth,
+    this.layoutEngine,
+    this.flatPackages = false,
     this.printComments = true,
     this.colorfullArrows = true,
     this.useNameSpace = true,
@@ -149,6 +157,8 @@ class UmlConfig {
     int? skinparamNodesep,
     int? skinparamRanksep,
     int? classMaxWidth,
+    String? layoutEngine,
+    bool? flatPackages,
     bool? printComments,
     bool? colorfullArrows,
     bool? useNameSpace,
@@ -173,6 +183,8 @@ class UmlConfig {
       skinparamNodesep: skinparamNodesep ?? this.skinparamNodesep,
       skinparamRanksep: skinparamRanksep ?? this.skinparamRanksep,
       classMaxWidth: classMaxWidth ?? this.classMaxWidth,
+      layoutEngine: layoutEngine ?? this.layoutEngine,
+      flatPackages: flatPackages ?? this.flatPackages,
       printComments: printComments ?? this.printComments,
       colorfullArrows: colorfullArrows ?? this.colorfullArrows,
       useNameSpace: useNameSpace ?? this.useNameSpace,
@@ -207,6 +219,8 @@ class UmlConfig {
       skinparamNodesep: map['skinparamNodesep'],
       skinparamRanksep: map['skinparamRanksep'],
       classMaxWidth: map['classMaxWidth'],
+      layoutEngine: map['layoutEngine'],
+      flatPackages: map['flatPackages'] ?? false,
       printComments: map['printComments'] ?? true,
       colorfullArrows: map['colorfullArrows'] ?? true,
       useNameSpace: map['useNameSpace'] ?? true,

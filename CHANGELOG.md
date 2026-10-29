@@ -1,6 +1,8 @@
 ## 0.0.6
 
 * Optional `style.class.maxWidth`: class cards wrap their text beyond this width (PlantUML `MaximumWidth`).
+* Optional `layout.engine` (`elk` or `smetana`, PlantUML `!pragma layout`): `elk` gives large diagrams a balanced width and height.
+* Optional `layout.flatPackages` (`set separator none`): dotted package names stay flat instead of nesting.
 
 ## 0.0.5
 

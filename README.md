@@ -81,6 +81,8 @@ options:
 layout:
   skinparamNodesep: 30
   skinparamRanksep: 100
+  engine: elk # optional: elk or smetana; omit for graphviz. elk balances large diagrams
+  flatPackages: true # optional: dotted package names stay flat instead of nesting
 style:
   relations:
     colorfullArrows: true

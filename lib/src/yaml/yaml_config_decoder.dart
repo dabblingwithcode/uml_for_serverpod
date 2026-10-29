@@ -23,6 +23,8 @@ class UmlConfigParser {
           // layout options
           skinparamNodesep: configYaml['layout']?['skinparamNodesep'],
           skinparamRanksep: configYaml['layout']?['skinparamRanksep'],
+          layoutEngine: configYaml['layout']?['engine'],
+          flatPackages: configYaml['layout']?['flatPackages'],
 
           // relations style
           colorfullArrows: configYaml['style']?['relations']
