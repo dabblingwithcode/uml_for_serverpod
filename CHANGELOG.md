@@ -1,3 +1,7 @@
+## 0.0.6
+
+* Optional `style.class.maxWidth`: class cards wrap their text beyond this width (PlantUML `MaximumWidth`).
+
 ## 0.0.5
 
 * added example models

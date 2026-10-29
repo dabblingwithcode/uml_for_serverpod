@@ -93,6 +93,7 @@ style:
     classNameHexColor: '#ff962f'
     classBackgroundHexColor: '#f1f8df'
     classBorderHexColor: '#333333'
+    maxWidth: 400 # optional: class cards wrap their text beyond this width (px)
   comment:
     commentHexColor: '#93c47d'
   namespace:

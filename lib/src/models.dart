@@ -86,6 +86,9 @@ class UmlConfig {
 
   final int? skinparamRanksep;
 
+  // class cards wider than this wrap their text (PlantUML MaximumWidth)
+  final int? classMaxWidth;
+
   // comments / colorful arrows options
   final bool printComments;
 
@@ -117,6 +120,7 @@ class UmlConfig {
   UmlConfig({
     this.skinparamNodesep,
     this.skinparamRanksep,
+    this.classMaxWidth,
     this.printComments = true,
     this.colorfullArrows = true,
     this.useNameSpace = true,
@@ -144,6 +148,7 @@ class UmlConfig {
   UmlConfig copyWith({
     int? skinparamNodesep,
     int? skinparamRanksep,
+    int? classMaxWidth,
     bool? printComments,
     bool? colorfullArrows,
     bool? useNameSpace,
@@ -167,6 +172,7 @@ class UmlConfig {
     return UmlConfig(
       skinparamNodesep: skinparamNodesep ?? this.skinparamNodesep,
       skinparamRanksep: skinparamRanksep ?? this.skinparamRanksep,
+      classMaxWidth: classMaxWidth ?? this.classMaxWidth,
       printComments: printComments ?? this.printComments,
       colorfullArrows: colorfullArrows ?? this.colorfullArrows,
       useNameSpace: useNameSpace ?? this.useNameSpace,
@@ -200,6 +206,7 @@ class UmlConfig {
     return UmlConfig(
       skinparamNodesep: map['skinparamNodesep'],
       skinparamRanksep: map['skinparamRanksep'],
+      classMaxWidth: map['classMaxWidth'],
       printComments: map['printComments'] ?? true,
       colorfullArrows: map['colorfullArrows'] ?? true,
       useNameSpace: map['useNameSpace'] ?? true,

@@ -41,6 +41,7 @@ class UmlConfigParser {
               ?['classBorderHexColor'],
           classBackgroundHexColor: configYaml['style']?['class']
               ?['classBackgroundHexColor'],
+          classMaxWidth: configYaml['style']?['class']?['maxWidth'],
           // comment style
           commentHexColor: configYaml['style']?['class']?['commentHexColor'],
           // namespace style

@@ -36,6 +36,7 @@ classDiagram {
   class {
     Padding 10 10 10 10
     FontSize 12
+${config.classMaxWidth != null ? '    MaximumWidth ${config.classMaxWidth}' : ''}
         header {
           FontSize 36
           FontStyle bold
