@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:uml_for_serverpod/src/graphviz/graphviz_backend.dart';
 import 'package:uml_for_serverpod/src/uml/colors.dart';
 import 'package:uml_for_serverpod/src/uml/generate_uml_namespaces_with_objects.dart';
 import 'package:uml_for_serverpod/src/uml/implicit_links.dart';
@@ -18,7 +19,12 @@ class UmlGenerator {
     required this.config,
   }) : spyYamlParser = SpyYamlParser(config: config);
 
-  Future<void> generate() async {
+  /// Generates the diagram and returns the path(s) written.
+  Future<String> generate() async {
+    if (!const {'plantuml', 'dot'}.contains(config.outputFormat)) {
+      throw ArgumentError.value(
+          config.outputFormat, 'output.format', 'must be plantuml or dot');
+    }
     // 1. Collect all .spy.yaml files and concatenate their content
     final yamlContent = await spyYamlParser.collectYamlContent();
 
@@ -26,6 +32,10 @@ class UmlGenerator {
 
     final serverpodObjectsMap =
         spyYamlParser.parseModels(yamlContent).serverpodObjectsMap;
+
+    if (config.outputFormat == 'dot') {
+      return generateGraphvizFiles(serverpodObjectsMap);
+    }
 
     // 3. Generate UML PlantUML content
     final umlContent = generateUml(serverpodObjectsMap);
@@ -35,7 +45,29 @@ class UmlGenerator {
 
     await umlFile.writeAsString(umlContent);
 
-    return;
+    return config.umlOutputFile;
+  }
+
+  /// The Graphviz backend writes `<stem>.svg` and the pinned `<stem>.dot`,
+  /// where the stem is the output path without its extension.
+  Future<String> generateGraphvizFiles(
+      Map<String, UmlObject> objectsMap) async {
+    final stem =
+        config.umlOutputFile.replaceFirst(RegExp(r'\.(puml|svg|dot)$'), '');
+    final result = await renderGraphviz(objectsMap, config);
+    await File('$stem.dot').writeAsString(result.dot);
+    await File('$stem.svg').writeAsString(result.svg);
+    stdout.writeln('📄 ✏️ Wrote ${objectsMap.length} objects in '
+        '${result.graph.packages.length} package blocks '
+        '(${result.layout.columns} columns), ${result.graph.edges.length} edges'
+        '${result.graph.droppedEdges > 0 ? ', dropped ${result.graph.droppedEdges} relations to unknown models' : ''}');
+    if (result.unroutedEdges.isNotEmpty) {
+      stdout
+          .writeln('⚠️ Graphviz could not route ${result.unroutedEdges.length} '
+              'edge(s) around the cards and drew them directly: '
+              '${result.unroutedEdges.join(', ')}');
+    }
+    return '$stem.svg (+ $stem.dot)';
   }
 
   String generateUml(Map<String, UmlObject> objectsMap) {

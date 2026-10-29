@@ -95,6 +95,30 @@ class UmlConfig {
   // class cards wider than this wrap their text (PlantUML MaximumWidth)
   final int? classMaxWidth;
 
+  // output backend: plantuml (default) or dot (Graphviz two-pass SVG)
+  final String outputFormat;
+
+  // directory holding the Graphviz dot and neato executables; null uses PATH
+  final String? graphvizBinDir;
+
+  // dot backend: package grid columns; null chooses them from gridAspectRatio
+  final int? gridColumns;
+
+  // dot backend: target width / height of the package grid (default 1.0)
+  final double? gridAspectRatio;
+
+  // dot backend: gap between package blocks, in points
+  final int gridGap;
+
+  // dot backend: rows (each block its own width) or cells (aligned columns)
+  final String gridMode;
+
+  // dot backend: packages placed first, in this order; the rest by name
+  final List<String> gridOrder;
+
+  // dot backend: Graphviz splines for the edges (true routes around cards)
+  final String splines;
+
   // comments / colorful arrows options
   final bool printComments;
 
@@ -132,6 +156,14 @@ class UmlConfig {
     this.classMaxWidth,
     this.layoutEngine,
     this.flatPackages = false,
+    this.outputFormat = 'plantuml',
+    this.graphvizBinDir,
+    this.gridColumns,
+    this.gridAspectRatio,
+    this.gridGap = 120,
+    this.gridMode = 'rows',
+    this.gridOrder = const [],
+    this.splines = 'true',
     this.printComments = true,
     this.colorfullArrows = true,
     this.colorfullTypeLinks = false,
@@ -163,6 +195,14 @@ class UmlConfig {
     int? classMaxWidth,
     String? layoutEngine,
     bool? flatPackages,
+    String? outputFormat,
+    String? graphvizBinDir,
+    int? gridColumns,
+    double? gridAspectRatio,
+    int? gridGap,
+    String? gridMode,
+    List<String>? gridOrder,
+    String? splines,
     bool? printComments,
     bool? colorfullArrows,
     bool? colorfullTypeLinks,
@@ -190,6 +230,14 @@ class UmlConfig {
       classMaxWidth: classMaxWidth ?? this.classMaxWidth,
       layoutEngine: layoutEngine ?? this.layoutEngine,
       flatPackages: flatPackages ?? this.flatPackages,
+      outputFormat: outputFormat ?? this.outputFormat,
+      graphvizBinDir: graphvizBinDir ?? this.graphvizBinDir,
+      gridColumns: gridColumns ?? this.gridColumns,
+      gridAspectRatio: gridAspectRatio ?? this.gridAspectRatio,
+      gridGap: gridGap ?? this.gridGap,
+      gridMode: gridMode ?? this.gridMode,
+      gridOrder: gridOrder ?? this.gridOrder,
+      splines: splines ?? this.splines,
       printComments: printComments ?? this.printComments,
       colorfullArrows: colorfullArrows ?? this.colorfullArrows,
       colorfullTypeLinks: colorfullTypeLinks ?? this.colorfullTypeLinks,
@@ -227,6 +275,14 @@ class UmlConfig {
       classMaxWidth: map['classMaxWidth'],
       layoutEngine: map['layoutEngine'],
       flatPackages: map['flatPackages'] ?? false,
+      outputFormat: map['outputFormat'] ?? 'plantuml',
+      graphvizBinDir: map['graphvizBinDir'],
+      gridColumns: map['gridColumns'],
+      gridAspectRatio: (map['gridAspectRatio'] as num?)?.toDouble(),
+      gridGap: map['gridGap'] ?? 120,
+      gridMode: map['gridMode'] ?? 'rows',
+      gridOrder: [...?(map['gridOrder'] as List?)?.map((e) => '$e')],
+      splines: map['splines'] ?? 'true',
       printComments: map['printComments'] ?? true,
       colorfullArrows: map['colorfullArrows'] ?? true,
       colorfullTypeLinks: map['colorfullTypeLinks'] ?? false,

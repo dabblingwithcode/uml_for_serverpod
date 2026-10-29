@@ -11,6 +11,11 @@ void main(List<String> args) async {
     ..addOption('dir', abbr: 'd', help: 'Directory containing .spy.yaml files')
     ..addOption('output', abbr: 'o', help: 'Output PlantUML file')
     ..addOption('config', abbr: 'c', help: 'Path to configuration YAML file')
+    ..addOption('format',
+        abbr: 'f',
+        allowed: ['plantuml', 'dot'],
+        help: 'plantuml writes a .puml file (default); dot renders an SVG '
+            'with Graphviz (two-pass package grid, curved edges)')
     ..addFlag('help',
         abbr: 'h', negatable: false, help: 'Show usage information');
 
@@ -55,13 +60,15 @@ void main(List<String> args) async {
     if (results['output'] != null) {
       config = config.copyWith(umlOutputFile: results['output']);
     }
+    if (results['format'] != null) {
+      config = config.copyWith(outputFormat: results['format']);
+    }
 
     final generator = UmlGenerator(config: config);
 
-    await generator.generate();
+    final written = await generator.generate();
 
-    stdout
-        .writeln('✅ Done! UML diagram created at ${config.umlOutputFile} 🗺️');
+    stdout.writeln('✅ Done! UML diagram created at $written 🗺️');
   } catch (e, stackTrace) {
     stdout.writeln('❌ Error: $e');
     printUsage(parser);

@@ -15,6 +15,9 @@ class UmlConfigParser {
               configYaml['paths']?['modelsDirPath'] ?? config.modelsDirPath,
           umlOutputFile:
               configYaml['paths']?['umlOutputFile'] ?? config.umlOutputFile,
+          // output backend
+          outputFormat: configYaml['output']?['format'],
+          graphvizBinDir: configYaml['output']?['graphvizBinDir'],
           // diagram options
           printComments: configYaml['options']?['printComments'],
           ignoreRootFolder: configYaml['options']?['ignoreRootFolder'],
@@ -25,6 +28,16 @@ class UmlConfigParser {
           skinparamRanksep: configYaml['layout']?['skinparamRanksep'],
           layoutEngine: configYaml['layout']?['engine'],
           flatPackages: configYaml['layout']?['flatPackages'],
+          gridColumns: configYaml['layout']?['grid']?['columns'],
+          gridAspectRatio:
+              (configYaml['layout']?['grid']?['aspectRatio'] as num?)
+                  ?.toDouble(),
+          gridGap: configYaml['layout']?['grid']?['gap'],
+          gridMode: configYaml['layout']?['grid']?['mode'],
+          gridOrder: (configYaml['layout']?['grid']?['order'] as List?)
+              ?.map((e) => '$e')
+              .toList(),
+          splines: configYaml['layout']?['splines']?.toString(),
 
           // relations style
           colorfullArrows: configYaml['style']?['relations']
